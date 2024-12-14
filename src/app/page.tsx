@@ -13,7 +13,7 @@ export default function Home() {
   const { data: buckets } = api.bucket.readAll.useQuery();
 
   return (
-    <div className="flex gap-4 p-2">
+    <div className="flex gap-4 overflow-x-auto p-2">
       {buckets?.map((bucket) => <Bucket key={bucket.id} bucket={bucket} />)}
       <NewBucket />
     </div>
@@ -50,15 +50,17 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
   };
 
   return (
-    <div className="w-[350px] rounded-xl border p-2">
-      <div className="mb-2 flex items-center justify-between">
+    <div className="min-w-[350px] rounded-xl border p-2">
+      <div className="flex items-center justify-between">
         <h4>{bucket.name}</h4>
         <button type="button" onClick={handleDeleteBucket}>
           <FaTrash className="text-red-400" />
         </button>
       </div>
 
-      <div className="flex">
+      <span className="text-sm text-gray-300">{bucket.description}</span>
+
+      <div className="mt-4 flex">
         <input
           type="text"
           value={task}
@@ -110,12 +112,19 @@ const Task = ({ task }: { task: TaskType }) => {
   return (
     <div className="border-1 rounded border border-gray-500 p-2">
       <div className="flex items-center justify-between">
-        <input
-          type="checkbox"
-          checked={task.complete}
-          onClick={handleToggleComplete}
-        />
-        {task.name}
+        <div className="flex items-center gap-1">
+          <input
+            type="checkbox"
+            checked={task.complete}
+            onChange={handleToggleComplete}
+            className="cursor-pointer"
+          />
+          <span
+            className={`${task.complete ? "line-through" : ""}`}
+            onClick={handleToggleComplete}>
+            {task.name}
+          </span>
+        </div>
         <button type="button" onClick={handleDeleteTask}>
           <FaTrash className="text-red-400" />
         </button>
@@ -143,7 +152,7 @@ const NewBucket = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded border p-2">
+    <div className="flex min-w-[350px] flex-col gap-2 rounded border p-2">
       <input
         type="text"
         value={name}
