@@ -1,53 +1,164 @@
-import Link from "next/link";
+"use client";
 
-import { LatestPost } from "~/app/_components/post";
-import { api, HydrateClient } from "~/trpc/server";
+import { useState } from "react";
+import { FaPlus, FaTrash } from "react-icons/fa";
+import { api } from "~/trpc/react";
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
+import { type RouterOutputs } from "~/trpc/react";
 
-  void api.post.getLatest.prefetch();
+type BucketType = RouterOutputs["bucket"]["readAll"][number];
+type TaskType = BucketType["tasks"][number];
+
+export default function Home() {
+  const { data: buckets } = api.bucket.readAll.useQuery();
 
   return (
-    <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-          </div>
-
-          <LatestPost />
-        </div>
-      </main>
-    </HydrateClient>
+    <div className="flex gap-4 p-2">
+      {buckets?.map((bucket) => <Bucket key={bucket.id} bucket={bucket} />)}
+      <NewBucket />
+    </div>
   );
 }
+
+const Bucket = ({ bucket }: { bucket: BucketType }) => {
+  const utils = api.useUtils();
+  const { mutate: deleteBucket } = api.bucket.delete.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
+  const { mutate: createTask } = api.task.create.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
+  const handleDeleteBucket = () => {
+    console.log(`deleting bucket with id ${bucket.id}`);
+    deleteBucket({ id: bucket.id });
+  };
+
+  const [task, setTask] = useState("");
+  const handleAddTask = () => {
+    console.log("adding task");
+    createTask({
+      name: task,
+      description: "TBD",
+      complete: false,
+      bucketId: bucket.id,
+    });
+    setTask("");
+  };
+
+  return (
+    <div className="w-[350px] rounded-xl border p-2">
+      <div className="mb-2 flex items-center justify-between">
+        <h4>{bucket.name}</h4>
+        <button type="button" onClick={handleDeleteBucket}>
+          <FaTrash className="text-red-400" />
+        </button>
+      </div>
+
+      <div className="flex">
+        <input
+          type="text"
+          value={task}
+          placeholder="Add task..."
+          onChange={(e) => setTask(e.target.value)}
+          className="rounded-r-none"
+        />
+        <button
+          type="button"
+          onClick={handleAddTask}
+          className="rounded-r-xl bg-orange-400">
+          <FaPlus className="mx-2 text-2xl" />
+        </button>
+      </div>
+
+      <div className="my-2 flex flex-col gap-2">
+        {bucket?.tasks.map((task) => <Task key={task.id} task={task} />)}
+      </div>
+    </div>
+  );
+};
+
+const Task = ({ task }: { task: TaskType }) => {
+  const utils = api.useUtils();
+  const { mutate: updateTask } = api.task.update.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
+  const { mutate: deleteTask } = api.task.delete.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
+  const handleDeleteTask = () => {
+    console.log("deleting task");
+    deleteTask({ id: task.id });
+  };
+  const handleToggleComplete = () => {
+    console.log("toggling complete");
+    updateTask({
+      id: task.id,
+      name: task.name,
+      description: task.description,
+      position: 0,
+      complete: !task.complete,
+    });
+  };
+  return (
+    <div className="border-1 rounded border border-gray-500 p-2">
+      <div className="flex items-center justify-between">
+        <input
+          type="checkbox"
+          checked={task.complete}
+          onClick={handleToggleComplete}
+        />
+        {task.name}
+        <button type="button" onClick={handleDeleteTask}>
+          <FaTrash className="text-red-400" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const NewBucket = () => {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  const utils = api.useUtils();
+  const { mutate: createBucket } = api.bucket.create.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
+
+  const handleCreateBucket = () => {
+    console.log("Createing bucket");
+    createBucket({ name, description, position: 0 });
+    setName("");
+    setDescription("");
+  };
+
+  return (
+    <div className="flex flex-col gap-2 rounded border p-2">
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+      <button
+        type="button"
+        onClick={handleCreateBucket}
+        className="rounded bg-orange-500 px-4 py-2 text-2xl">
+        Add
+      </button>
+    </div>
+  );
+};

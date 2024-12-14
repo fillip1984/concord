@@ -18,3 +18,22 @@ model Post {
 
     @@index([name])
 }
+
+model Bucket {
+    id          String @id @default(cuid())
+    name        String
+    description String
+    position    Int
+
+    tasks Task[]
+}
+
+model Task {
+    id          String  @id @default(cuid())
+    name        String
+    description String
+    complete    Boolean
+
+    bucket   Bucket @relation(fields: [bucketId], references: [id], onDelete: Cascade)
+    bucketId String
+}

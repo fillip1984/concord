@@ -17,7 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          <main className="flex min-h-screen overflow-hidden bg-stone-900 text-white">
+            {children}
+          </main>
+        </TRPCReactProvider>
       </body>
     </html>
   );

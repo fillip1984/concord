@@ -1,6 +1,8 @@
 import { type Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
 
+import tailwindcssForms from "@tailwindcss/forms";
+
 export default {
   content: ["./src/**/*.tsx"],
   theme: {
@@ -10,5 +12,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [tailwindcssForms],
 } satisfies Config;
