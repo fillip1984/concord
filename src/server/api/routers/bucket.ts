@@ -8,7 +8,7 @@ export const bucketRouter = createTRPCRouter({
       include: {
         tasks: {
           orderBy: {
-            name: "asc",
+            position: "asc",
           },
         },
       },

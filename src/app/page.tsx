@@ -1,10 +1,10 @@
 "use client";
 
+import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import { useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { api } from "~/trpc/react";
-
-import { type RouterOutputs } from "~/trpc/react";
+import { PiDotsSixVertical } from "react-icons/pi";
+import { api, type RouterOutputs } from "~/trpc/react";
 
 type BucketType = RouterOutputs["bucket"]["readAll"][number];
 type TaskType = BucketType["tasks"][number];
@@ -44,9 +44,29 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
       name: task,
       description: "TBD",
       complete: false,
+      position: 0,
       bucketId: bucket.id,
     });
     setTask("");
+  };
+
+  // DND
+  const [taskListRef, tasks] = useDragAndDrop<HTMLDivElement, TaskType>(
+    bucket.tasks,
+    {
+      group: "taskList",
+      dragHandle: ".drag-handle",
+      onDragend() {
+        handleReorder();
+      },
+    },
+  );
+
+  const handleReorder = () => {
+    const updates = tasks.map((t, i) => {
+      return { taskId: t.id, position: i };
+    });
+    console.log({ updates });
   };
 
   return (
@@ -76,8 +96,10 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
         </button>
       </div>
 
-      <div className="my-2 flex flex-col gap-2">
-        {bucket?.tasks.map((task) => <Task key={task.id} task={task} />)}
+      <div ref={taskListRef} className="my-2 flex flex-col gap-2">
+        {tasks.map((task) => (
+          <Task key={task.id} task={task} />
+        ))}
       </div>
     </div>
   );
@@ -109,9 +131,11 @@ const Task = ({ task }: { task: TaskType }) => {
       complete: !task.complete,
     });
   };
+
   return (
-    <div className="border-1 rounded border border-gray-500 p-2">
-      <div className="flex items-center justify-between">
+    <div className="border-1 flex items-center rounded border border-gray-500">
+      <PiDotsSixVertical className="drag-handle mx-1 cursor-grab" />
+      <div className="flex flex-1 items-center justify-between py-2 pr-2">
         <div className="flex items-center gap-1">
           <input
             type="checkbox"

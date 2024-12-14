@@ -28,6 +28,7 @@ export const taskRouter = createTRPCRouter({
         name: z.string().min(1),
         description: z.string().min(1),
         complete: z.boolean(),
+        position: z.number(),
         bucketId: z.string().min(1),
       }),
     )
@@ -37,6 +38,7 @@ export const taskRouter = createTRPCRouter({
           name: input.name,
           description: input.description,
           complete: input.complete,
+          position: input.position,
           bucketId: input.bucketId,
         },
       });
@@ -88,5 +90,10 @@ export const taskRouter = createTRPCRouter({
           id: input.id,
         },
       });
+    }),
+  reoder: publicProcedure
+    .input(z.array(z.object({ id: z.string().min(1), position: z.number() })))
+    .mutation(async ({ ctx, input }) => {
+      ctx.db.$transaction([]);
     }),
 });
