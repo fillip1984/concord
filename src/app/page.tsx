@@ -3,6 +3,7 @@
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import { useEffect, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import { FaRepeat } from "react-icons/fa6";
 import { PiDotsSixVertical } from "react-icons/pi";
 import { api, type RouterOutputs } from "~/trpc/react";
 
@@ -32,6 +33,11 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
       await utils.bucket.invalidate();
     },
   });
+  const { mutate: updateTask } = api.task.update.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
   const { mutate: reoderTasks } = api.task.reoder.useMutation({
     onSuccess: async () => {
       await utils.bucket.invalidate();
@@ -49,7 +55,7 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
       name: task,
       description: "TBD",
       complete: false,
-      position: 0,
+      position: bucket.tasks.length,
       bucketId: bucket.id,
     });
     setTask("");
@@ -78,6 +84,10 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
     reoderTasks(updates);
   };
 
+  const handleReset = () => {
+    tasks.forEach((t) => updateTask({ ...t, complete: false }));
+  };
+
   return (
     <div className="min-w-[350px] rounded-xl border p-2">
       <div className="flex items-center justify-between">
@@ -95,6 +105,7 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
           value={task}
           placeholder="Add task..."
           onChange={(e) => setTask(e.target.value)}
+          onKeyDown={(e) => (e.key === "Enter" ? handleAddTask() : null)}
           className="rounded-r-none"
         />
         <button
@@ -110,6 +121,13 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
           <Task key={task.id} task={task} />
         ))}
       </div>
+      <button
+        type="button"
+        onClick={handleReset}
+        className="flex w-full items-center justify-center gap-2 rounded bg-emerald-400 p-1">
+        <span className="text-xl">Reset</span>
+        <FaRepeat />
+      </button>
     </div>
   );
 };
@@ -150,10 +168,9 @@ const Task = ({ task }: { task: TaskType }) => {
             type="checkbox"
             checked={task.complete}
             onChange={handleToggleComplete}
-            className="cursor-pointer"
           />
           <span
-            className={`${task.complete ? "line-through" : ""}`}
+            className={`${task.complete ? "line-through" : ""} cursor-pointer`}
             onClick={handleToggleComplete}>
             {task.name}
           </span>
@@ -190,10 +207,12 @@ const NewBucket = () => {
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        placeholder="Name..."
       />
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        placeholder="Description..."
       />
       <button
         type="button"
