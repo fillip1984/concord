@@ -60,7 +60,7 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
     HTMLDivElement,
     TaskType
   >(bucket.tasks, {
-    group: "taskList",
+    group: bucket.id,
     dragHandle: ".drag-handle",
     onDragend() {
       handleReorder();
