@@ -1,7 +1,7 @@
 "use client";
 
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { PiDotsSixVertical } from "react-icons/pi";
 import { api, type RouterOutputs } from "~/trpc/react";
@@ -32,6 +32,11 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
       await utils.bucket.invalidate();
     },
   });
+  const { mutate: reoderTasks } = api.task.reoder.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
   const handleDeleteBucket = () => {
     console.log(`deleting bucket with id ${bucket.id}`);
     deleteBucket({ id: bucket.id });
@@ -51,22 +56,26 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
   };
 
   // DND
-  const [taskListRef, tasks] = useDragAndDrop<HTMLDivElement, TaskType>(
-    bucket.tasks,
-    {
-      group: "taskList",
-      dragHandle: ".drag-handle",
-      onDragend() {
-        handleReorder();
-      },
+  const [taskListRef, tasks, setTasks] = useDragAndDrop<
+    HTMLDivElement,
+    TaskType
+  >(bucket.tasks, {
+    group: "taskList",
+    dragHandle: ".drag-handle",
+    onDragend() {
+      handleReorder();
     },
-  );
+  });
+  useEffect(() => {
+    setTasks(bucket.tasks);
+  }, [bucket, setTasks]);
 
   const handleReorder = () => {
     const updates = tasks.map((t, i) => {
-      return { taskId: t.id, position: i };
+      return { id: t.id, position: i };
     });
     console.log({ updates });
+    reoderTasks(updates);
   };
 
   return (
