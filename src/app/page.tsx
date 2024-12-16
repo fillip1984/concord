@@ -19,27 +19,54 @@ type TaskType = BucketType["tasks"][number];
 
 export default function Home() {
   const { data } = api.bucket.readAll.useQuery();
+  return <>{data !== undefined && <Board data={data} />}</>;
+}
+
+const Board = ({ data }: { data: BucketType[] }) => {
+  const utils = api.useUtils();
+  const { mutate: reoderBuckets } = api.bucket.reoder.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
+
   // DND
   const [bucketListRef, buckets, setBuckets] = useDragAndDrop<
     HTMLDivElement,
     BucketType
-  >(data ?? [], { group: "buckets", dragHandle: ".drag-handle" });
-
+  >(data, {
+    group: "buckets",
+    dragHandle: ".drag-handle",
+    onDragend: () => {
+      handleReorder();
+    },
+  });
   useEffect(() => {
-    if (data) {
+    if (data.length > 0) {
+      console.log("reload");
       setBuckets(data);
     }
   }, [data, setBuckets]);
 
+  const handleReorder = () => {
+    const updates = buckets.map((b, i) => {
+      return { id: b.id, position: i };
+    });
+    console.log({ updates });
+    reoderBuckets(updates);
+  };
+
   return (
-    <div ref={bucketListRef} className="flex gap-4 overflow-x-auto p-2">
-      {buckets.map((bucket) => (
-        <Bucket key={bucket.id} bucket={bucket} />
-      ))}
+    <div className="flex gap-8 overflow-x-auto p-2">
+      <div ref={bucketListRef} className="flex gap-4">
+        {buckets.map((bucket) => (
+          <Bucket key={bucket.id} bucket={bucket} />
+        ))}
+      </div>
       <NewBucket />
     </div>
   );
-}
+};
 
 const Bucket = ({ bucket }: { bucket: BucketType }) => {
   const [bucketToEdit, setBucketToEdit] = useState<BucketType | null>(null);
@@ -83,6 +110,10 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
     setTask("");
   };
 
+  const handleReset = () => {
+    tasks.forEach((t) => updateTask({ ...t, complete: false }));
+  };
+
   // DND
   const [taskListRef, tasks, setTasks] = useDragAndDrop<
     HTMLDivElement,
@@ -104,10 +135,6 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
     });
     console.log({ updates });
     reoderTasks(updates);
-  };
-
-  const handleReset = () => {
-    tasks.forEach((t) => updateTask({ ...t, complete: false }));
   };
 
   return (

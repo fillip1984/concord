@@ -68,4 +68,20 @@ export const bucketRouter = createTRPCRouter({
         },
       });
     }),
+  reoder: publicProcedure
+    .input(z.array(z.object({ id: z.string().min(1), position: z.number() })))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.$transaction(async (tx) => {
+        for (const bucket of input) {
+          await tx.bucket.update({
+            where: {
+              id: bucket.id,
+            },
+            data: {
+              position: bucket.position,
+            },
+          });
+        }
+      });
+    }),
 });
