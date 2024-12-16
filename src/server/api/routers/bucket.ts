@@ -16,19 +16,7 @@ export const bucketRouter = createTRPCRouter({
         position: "asc",
       },
     });
-    //   const results = ctx.db.bucket.findMany({
-    //     where: { boardId: input.boardId },
-    //     select: {
-    //       id: true,
-    //       name: true,
-    //     },
-    //     orderBy: {
-    //       position: "asc",
-    //     },
-    //   });
-    //   return results;
   }),
-
   create: publicProcedure
     .input(
       z.object({
@@ -49,31 +37,23 @@ export const bucketRouter = createTRPCRouter({
   update: publicProcedure
     .input(
       z.object({
+        id: z.string().min(1),
         name: z.string().min(1),
         description: z.string().min(1),
         position: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      throw new Error("Not implemented yet");
-      const current = await ctx.db.bucket.findMany({
-        orderBy: {
-          position: "asc",
+      return await ctx.db.bucket.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+          description: input.description,
+          position: input.position,
         },
       });
-
-      // return await ctx.db.$transaction(async (tx) => {
-      //   for (const bucket of input.buckets) {
-      //     await tx.bucket.update({
-      //       where: {
-      //         id: bucket.id,
-      //       },
-      //       data: {
-      //         position: bucket.position,
-      //       },
-      //     });
-      //   }
-      // });
     }),
   delete: publicProcedure
     .input(

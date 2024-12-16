@@ -9,19 +9,7 @@ export const taskRouter = createTRPCRouter({
         name: "asc",
       },
     });
-    //   const results = ctx.db.task.findMany({
-    //     where: { boardId: input.boardId },
-    //     select: {
-    //       id: true,
-    //       name: true,
-    //     },
-    //     orderBy: {
-    //       position: "asc",
-    //     },
-    //   });
-    //   return results;
   }),
-
   create: publicProcedure
     .input(
       z.object({
@@ -64,19 +52,6 @@ export const taskRouter = createTRPCRouter({
           complete: input.complete,
         },
       });
-      // const current = await ctx.db.task.findMany();
-      // return await ctx.db.$transaction(async (tx) => {
-      //   for (const task of input.tasks) {
-      //     await tx.task.update({
-      //       where: {
-      //         id: task.id,
-      //       },
-      //       data: {
-      //         position: task.position,
-      //       },
-      //     });
-      //   }
-      // });
     }),
   delete: publicProcedure
     .input(
