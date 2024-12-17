@@ -13,6 +13,7 @@ import { FaPencil, FaRepeat } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
 import { PiDotsSix, PiDotsSixVertical } from "react-icons/pi";
 import { api, type RouterOutputs } from "~/trpc/react";
+import { BsFillFunnelFill } from "react-icons/bs";
 
 type BucketType = RouterOutputs["bucket"]["readAll"][number];
 type TaskType = BucketType["tasks"][number];
@@ -57,13 +58,24 @@ const Board = ({ data }: { data: BucketType[] }) => {
   };
 
   return (
-    <div className="flex gap-8 overflow-x-auto p-2">
-      <div ref={bucketListRef} className="flex gap-4">
-        {buckets.map((bucket) => (
-          <Bucket key={bucket.id} bucket={bucket} />
-        ))}
+    <div className="flex flex-col gap-8 overflow-x-auto">
+      <div className="fixed w-full p-2">
+        <div className="flex justify-between">
+          <input type="text" placeholder="Search..." className="w-1/2" />
+          <button type="button" className="rounded bg-emerald-400 p-2">
+            <BsFillFunnelFill />
+          </button>
+        </div>
       </div>
-      <NewBucket />
+
+      <div className="m-4 mt-16 flex flex-1 gap-8">
+        <div ref={bucketListRef} className="flex flex-1 gap-4">
+          {buckets.map((bucket) => (
+            <Bucket key={bucket.id} bucket={bucket} />
+          ))}
+        </div>
+        <NewBucket />
+      </div>
     </div>
   );
 };

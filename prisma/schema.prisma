@@ -10,31 +10,100 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
+model Board {
+    id        String   @id @default(cuid())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    @@index([name])
+    name        String
+    description String
+
+    buckets Bucket[]
 }
 
 model Bucket {
-    id          String @id @default(cuid())
+    id          String  @id @default(cuid())
     name        String
-    description String
+    description String?
     position    Int
 
     tasks Task[]
+
+    board   Board  @relation(fields: [boardId], references: [id])
+    boardId String
 }
 
 model Task {
-    id          String  @id @default(cuid())
-    name        String
-    description String
-    complete    Boolean
+    id          String          @id @default(cuid())
+    text        String
+    description String?
+    complete    Boolean         @default(false)
     position    Int
+    dueDate     DateTime?
+    priority    PriorityOption?
 
     bucket   Bucket @relation(fields: [bucketId], references: [id], onDelete: Cascade)
     bucketId String
+
+    tags TaskTags[]
+
+    comments Comment[]
+
+    checkListItems CheckListItem[]
+}
+
+model TaskTags {
+    task       Task     @relation(fields: [taskId], references: [id])
+    taskId     String
+    tag        Tag      @relation(fields: [tagId], references: [id])
+    tagId      String
+    assignedAt DateTime @default(now())
+
+    @@id([taskId, tagId])
+}
+
+model Tag {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name        String
+    description String?
+    color       String?
+
+    tags TaskTags[]
+}
+
+model Comment {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    text   String
+    posted DateTime
+
+    task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    taskId String
+}
+
+model CheckListItem {
+    id String @id @default(cuid())
+
+    text     String
+    complete Boolean @default(false)
+
+    task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    taskId String
+}
+
+enum PriorityOption {
+    LOWEST
+    LOW
+    MEDIUM
+    HIGH
+    HIGHEST
+    // variation 2
+    URGENT
+    IMPORTANT
+    URGENT_AND_IMPORTANT
 }
