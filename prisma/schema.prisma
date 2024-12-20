@@ -22,7 +22,10 @@ model Board {
 }
 
 model Bucket {
-    id          String  @id @default(cuid())
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
     name        String
     description String?
     position    Int
@@ -34,7 +37,10 @@ model Bucket {
 }
 
 model Task {
-    id          String          @id @default(cuid())
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
     text        String
     description String?
     complete    Boolean         @default(false)
@@ -87,7 +93,9 @@ model Comment {
 }
 
 model CheckListItem {
-    id String @id @default(cuid())
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     text     String
     complete Boolean @default(false)

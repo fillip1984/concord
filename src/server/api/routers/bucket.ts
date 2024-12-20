@@ -21,8 +21,9 @@ export const bucketRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1),
-        description: z.string().min(1),
+        description: z.string(),
         position: z.number(),
+        boardId: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -31,6 +32,7 @@ export const bucketRouter = createTRPCRouter({
           name: input.name,
           description: input.description,
           position: input.position,
+          boardId: input.boardId,
         },
       });
     }),
@@ -39,7 +41,7 @@ export const bucketRouter = createTRPCRouter({
       z.object({
         id: z.string().min(1),
         name: z.string().min(1),
-        description: z.string().min(1),
+        description: z.string(),
         position: z.number(),
       }),
     )

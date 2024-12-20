@@ -1,6 +1,6 @@
 "use client";
 
-import { useDragAndDrop } from "@formkit/drag-and-drop/react";
+import Link from "next/link";
 import {
   type Dispatch,
   type FormEvent,
@@ -8,454 +8,162 @@ import {
   useEffect,
   useState,
 } from "react";
-import { FaPlus, FaTrash } from "react-icons/fa";
-import { FaPencil, FaRepeat } from "react-icons/fa6";
+import { FaPencil, FaPlus, FaTrash } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
-import { PiDotsSix, PiDotsSixVertical } from "react-icons/pi";
-import { api, type RouterOutputs } from "~/trpc/react";
-import { BsFillFunnelFill } from "react-icons/bs";
+import { api, type RouterInputs, type RouterOutputs } from "~/trpc/react";
 
-type BucketType = RouterOutputs["bucket"]["readAll"][number];
-type TaskType = BucketType["tasks"][number];
+type BoardType = RouterOutputs["board"]["readAll"][number];
+type NewBoardType = RouterInputs["board"]["create"];
 
 export default function Home() {
-  const { data } = api.bucket.readAll.useQuery();
-  return <>{data !== undefined && <Board data={data} />}</>;
-}
-
-const Board = ({ data }: { data: BucketType[] }) => {
-  const utils = api.useUtils();
-  const { mutate: reoderBuckets } = api.bucket.reoder.useMutation({
-    onSuccess: async () => {
-      await utils.bucket.invalidate();
-    },
-  });
-
-  // DND
-  const [bucketListRef, buckets, setBuckets] = useDragAndDrop<
-    HTMLDivElement,
-    BucketType
-  >(data, {
-    group: "buckets",
-    dragHandle: ".drag-handle",
-    onDragend: () => {
-      handleReorder();
-    },
-  });
-  useEffect(() => {
-    if (data.length > 0) {
-      console.log("reload");
-      setBuckets(data);
-    }
-  }, [data, setBuckets]);
-
-  const handleReorder = () => {
-    const updates = buckets.map((b, i) => {
-      return { id: b.id, position: i };
-    });
-    console.log({ updates });
-    reoderBuckets(updates);
-  };
-
-  return (
-    <div className="flex flex-col gap-8 overflow-x-auto">
-      <div className="fixed w-full p-2">
-        <div className="flex justify-between">
-          <input type="text" placeholder="Search..." className="w-1/2" />
-          <button type="button" className="rounded bg-emerald-400 p-2">
-            <BsFillFunnelFill />
-          </button>
-        </div>
-      </div>
-
-      <div className="m-4 mt-16 flex flex-1 gap-8">
-        <div ref={bucketListRef} className="flex flex-1 gap-4">
-          {buckets.map((bucket) => (
-            <Bucket key={bucket.id} bucket={bucket} />
-          ))}
-        </div>
-        <NewBucket />
-      </div>
-    </div>
-  );
-};
-
-const Bucket = ({ bucket }: { bucket: BucketType }) => {
-  const [bucketToEdit, setBucketToEdit] = useState<BucketType | null>(null);
-
-  const utils = api.useUtils();
-  const { mutate: deleteBucket } = api.bucket.delete.useMutation({
-    onSuccess: async () => {
-      await utils.bucket.invalidate();
-    },
-  });
-  const { mutate: createTask } = api.task.create.useMutation({
-    onSuccess: async () => {
-      await utils.bucket.invalidate();
-    },
-  });
-  const { mutate: updateTask } = api.task.update.useMutation({
-    onSuccess: async () => {
-      await utils.bucket.invalidate();
-    },
-  });
-  const { mutate: reoderTasks } = api.task.reoder.useMutation({
-    onSuccess: async () => {
-      await utils.bucket.invalidate();
-    },
-  });
-  const handleDeleteBucket = () => {
-    console.log(`deleting bucket with id ${bucket.id}`);
-    deleteBucket({ id: bucket.id });
-  };
-
-  const [task, setTask] = useState("");
-  const handleAddTask = () => {
-    console.log("adding task");
-    createTask({
-      name: task,
-      description: "TBD",
-      complete: false,
-      position: bucket.tasks.length,
-      bucketId: bucket.id,
-    });
-    setTask("");
-  };
-
-  const handleReset = () => {
-    tasks.forEach((t) => updateTask({ ...t, complete: false }));
-  };
-
-  // DND
-  const [taskListRef, tasks, setTasks] = useDragAndDrop<
-    HTMLDivElement,
-    TaskType
-  >(bucket.tasks, {
-    group: bucket.id,
-    dragHandle: ".drag-handle",
-    onDragend() {
-      handleReorder();
-    },
-  });
-  useEffect(() => {
-    setTasks(bucket.tasks);
-  }, [bucket, setTasks]);
-
-  const handleReorder = () => {
-    const updates = tasks.map((t, i) => {
-      return { id: t.id, position: i };
-    });
-    console.log({ updates });
-    reoderTasks(updates);
+  const { data: boards } = api.board.readAll.useQuery();
+  const [boardToEdit, setBoardToEdit] = useState<
+    BoardType | NewBoardType | null
+  >(null);
+  const handleAddBoard = () => {
+    setBoardToEdit({ name: "", description: "" });
   };
 
   return (
     <>
-      <div className="min-w-[350px] rounded-xl border p-2">
-        <div className="flex justify-center">
-          <PiDotsSix className="drag-handle mx-1 cursor-grab" />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <h4>{bucket.name}</h4>
-            <button type="button" onClick={() => setBucketToEdit(bucket)}>
-              <FaPencil className="text-gray-600" />
-            </button>
+      <div>
+        <h3>Boards</h3>
+        <div className="flex gap-4">
+          <div className="flex gap-2">
+            {boards?.map((board) => (
+              <BoardCard
+                key={board.id}
+                board={board}
+                setBoardToEdit={setBoardToEdit}
+              />
+            ))}
           </div>
-          <button type="button" onClick={handleDeleteBucket}>
-            <FaTrash className="text-red-400" />
-          </button>
-        </div>
-
-        <span className="text-sm text-gray-300">{bucket.description}</span>
-
-        <div className="mt-4 flex">
-          <input
-            type="text"
-            value={task}
-            placeholder="Add task..."
-            onChange={(e) => setTask(e.target.value)}
-            onKeyDown={(e) => (e.key === "Enter" ? handleAddTask() : null)}
-            className="rounded-r-none"
-          />
           <button
             type="button"
-            onClick={handleAddTask}
-            className="rounded-r-xl bg-orange-400">
-            <FaPlus className="mx-2 text-2xl" />
+            onClick={handleAddBoard}
+            className="flex min-h-[200px] flex-col items-center justify-center rounded border p-2 text-2xl">
+            Add Board <FaPlus />
           </button>
         </div>
-
-        <div ref={taskListRef} className="my-2 flex flex-col gap-2">
-          {tasks.map((task) => (
-            <Task key={task.id} task={task} />
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={handleReset}
-          className="flex w-full items-center justify-center gap-2 rounded bg-emerald-400 p-1">
-          <span className="text-xl">Reset</span>
-          <FaRepeat />
-        </button>
       </div>
 
-      {bucketToEdit && (
-        <BucketDetailsModal
-          bucket={bucketToEdit}
-          setBucketToEdit={setBucketToEdit}
+      {boardToEdit && (
+        <BoardDetailsModal
+          board={boardToEdit}
+          setBoardToEdit={setBoardToEdit}
         />
       )}
     </>
   );
-};
+}
 
-const Task = ({ task }: { task: TaskType }) => {
-  const [taskToEdit, setTaskToEdit] = useState<TaskType | null>(null);
+const BoardCard = ({
+  board,
+  setBoardToEdit,
+}: {
+  board: BoardType;
+  setBoardToEdit: Dispatch<SetStateAction<BoardType | NewBoardType | null>>;
+}) => {
   const utils = api.useUtils();
-  const { mutate: updateTask } = api.task.update.useMutation({
+  const { mutate: deleteBoard } = api.board.delete.useMutation({
     onSuccess: async () => {
-      await utils.bucket.invalidate();
+      await utils.board.invalidate();
     },
   });
-  const { mutate: deleteTask } = api.task.delete.useMutation({
-    onSuccess: async () => {
-      await utils.bucket.invalidate();
-    },
-  });
-  const handleDeleteTask = () => {
-    console.log("deleting task");
-    deleteTask({ id: task.id });
-  };
-  const handleToggleComplete = () => {
-    console.log("toggling complete");
-    updateTask({
-      id: task.id,
-      name: task.name,
-      description: task.description,
-      position: 0,
-      complete: !task.complete,
-    });
-  };
-  const handleTaskEdit = () => {
-    console.log("editing task");
-    setTaskToEdit(task);
+  const handleDeleteBoard = () => {
+    deleteBoard({ id: board.id });
   };
 
   return (
-    <>
-      <div className="border-1 flex items-center rounded border border-gray-500">
-        <PiDotsSixVertical className="drag-handle mx-1 cursor-grab" />
-        <div className="flex flex-1 items-center justify-between py-2 pr-2">
-          <div className="flex items-center gap-1">
-            <input
-              type="checkbox"
-              checked={task.complete}
-              onChange={handleToggleComplete}
-            />
-            <span
-              className={`${task.complete ? "line-through" : ""} cursor-pointer`}
-              onClick={handleToggleComplete}>
-              {task.name}
-            </span>
-          </div>
-          <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={handleTaskEdit}
-              className="text-emerald-300">
-              <FaPencil />
-            </button>
-            <button type="button" onClick={handleDeleteTask}>
-              <FaTrash className="text-red-400" />
-            </button>
-          </div>
+    <Link
+      href={`/boards/${board.id}`}
+      className="flex min-h-[200px] min-w-[350px] rounded-xl border p-2">
+      <div className="flex flex-1 flex-col justify-between">
+        <div>
+          <h4>{board.name}</h4>
+          <p className="text-gray-500">{board.description}</p>
+        </div>
+        <div className="flex justify-end gap-2 p-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setBoardToEdit(board);
+            }}>
+            <FaPencil className="text-gray-600" />
+          </button>
+          <button type="button" onClick={() => handleDeleteBoard()}>
+            <FaTrash className="text-red-400" />
+          </button>
         </div>
       </div>
-
-      {taskToEdit && (
-        <TaskDetailsModal task={taskToEdit} setTaskToEdit={setTaskToEdit} />
-      )}
-    </>
+    </Link>
   );
 };
 
-const NewBucket = () => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-
-  const utils = api.useUtils();
-  const { mutate: createBucket } = api.bucket.create.useMutation({
-    onSuccess: async () => {
-      await utils.bucket.invalidate();
-    },
-  });
-
-  const handleCreateBucket = () => {
-    console.log("Createing bucket");
-    createBucket({ name, description, position: 0 });
-    setName("");
-    setDescription("");
-  };
-
-  return (
-    <div className="flex min-w-[350px] flex-col gap-2 rounded border p-2">
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Name..."
-      />
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Description..."
-      />
-      <button
-        type="button"
-        onClick={handleCreateBucket}
-        className="rounded bg-orange-500 px-4 py-2 text-2xl">
-        Add
-      </button>
-    </div>
-  );
-};
-
-const TaskDetailsModal = ({
-  task,
-  setTaskToEdit,
+const BoardDetailsModal = ({
+  board,
+  setBoardToEdit,
 }: {
-  task: TaskType;
-  setTaskToEdit: Dispatch<SetStateAction<TaskType | null>>;
+  board: BoardType | NewBoardType;
+  setBoardToEdit: Dispatch<SetStateAction<BoardType | NewBoardType | null>>;
 }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    setName(task.name);
-    setDescription(task.description);
-  }, [task]);
+    setName(board.name);
+    setDescription(board.description);
+  }, [board]);
 
   const utils = api.useUtils();
-  const { mutate: updateTask } = api.task.update.useMutation({
+  const { mutate: createboard } = api.board.create.useMutation({
     onSuccess: async () => {
-      void utils.bucket.invalidate();
-      setTaskToEdit(null);
+      void utils.board.invalidate();
+      setBoardToEdit(null);
     },
   });
 
   const handleSave = (e: FormEvent) => {
     e.preventDefault();
-    updateTask({
-      id: task.id,
-      name,
-      description,
-      complete: task.complete,
-      position: task.position,
-    });
+    createboard({ name, description });
+    // updateboard({
+    //   id: board.id,
+    //   name,
+    //   description,
+    // });
   };
 
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        onClick={() => setTaskToEdit(null)}
-        className="absolute inset-0 z-[999] bg-gray-500/10 backdrop-blur-sm"></div>
+        onClick={() => setBoardToEdit(null)}
+        className="absolute inset-0 z-[999] bg-black/30 backdrop-blur"></div>
 
-      {/* Modal content */}
-      <div className="z-[1000] min-h-[400px] w-1/2 bg-stone-700">
-        <div className="flex items-center justify-between p-2">
-          <span>{task.name}</span>
-          <button type="button" onClick={() => setTaskToEdit(null)}>
-            <IoIosClose className="text-2xl" />
+      {/* Modal Container */}
+      <div className="z-[1000] min-h-[400px] w-1/2 rounded-lg bg-stone-700">
+        {/* Modal toolbar */}
+        <div className="flex justify-end">
+          <button type="button" onClick={() => setBoardToEdit(null)}>
+            <IoIosClose className="text-4xl" />
           </button>
         </div>
 
+        {/* Modal body */}
         <form onSubmit={handleSave} className="flex flex-col gap-2 p-4">
           <div className="flex flex-col gap-2">
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder="Name..."
             />
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              className="rounded bg-orange-400 px-4 py-2 text-2xl">
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-const BucketDetailsModal = ({
-  bucket,
-  setBucketToEdit,
-}: {
-  bucket: BucketType;
-  setBucketToEdit: Dispatch<SetStateAction<BucketType | null>>;
-}) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-
-  useEffect(() => {
-    setName(bucket.name);
-    setDescription(bucket.description);
-  }, [bucket]);
-
-  const utils = api.useUtils();
-  const { mutate: updateBucket } = api.bucket.update.useMutation({
-    onSuccess: async () => {
-      void utils.bucket.invalidate();
-      setBucketToEdit(null);
-    },
-  });
-
-  const handleSave = (e: FormEvent) => {
-    e.preventDefault();
-    updateBucket({
-      id: bucket.id,
-      name,
-      description,
-      position: bucket.position,
-    });
-  };
-
-  return (
-    <div className="absolute inset-0 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        onClick={() => setBucketToEdit(null)}
-        className="absolute inset-0 z-[999] bg-gray-500/10 backdrop-blur-sm"></div>
-
-      {/* Modal content */}
-      <div className="z-[1000] min-h-[400px] w-1/2 bg-stone-700">
-        <div className="flex items-center justify-between p-2">
-          <span>{bucket.name}</span>
-          <button type="button" onClick={() => setBucketToEdit(null)}>
-            <IoIosClose className="text-2xl" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSave} className="flex flex-col gap-2 p-4">
-          <div className="flex flex-col gap-2">
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Description..."
             />
           </div>
 

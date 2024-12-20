@@ -6,14 +6,14 @@ export const taskRouter = createTRPCRouter({
   readAll: publicProcedure.query(async ({ ctx }) => {
     return await ctx.db.task.findMany({
       orderBy: {
-        name: "asc",
+        text: "asc",
       },
     });
   }),
   create: publicProcedure
     .input(
       z.object({
-        name: z.string().min(1),
+        text: z.string().min(1),
         description: z.string().min(1),
         complete: z.boolean(),
         position: z.number(),
@@ -23,7 +23,7 @@ export const taskRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.task.create({
         data: {
-          name: input.name,
+          text: input.text,
           description: input.description,
           complete: input.complete,
           position: input.position,
@@ -35,7 +35,7 @@ export const taskRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().min(1),
-        name: z.string().min(1),
+        text: z.string().min(1),
         description: z.string().min(1),
         position: z.number(),
         complete: z.boolean(),
@@ -47,7 +47,7 @@ export const taskRouter = createTRPCRouter({
           id: input.id,
         },
         data: {
-          name: input.name,
+          text: input.text,
           description: input.description,
           complete: input.complete,
         },
