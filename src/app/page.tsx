@@ -26,7 +26,7 @@ export default function Home() {
 
   return (
     <>
-      <div>
+      <div className="p-4">
         <h3>Boards</h3>
         <div className="flex gap-4">
           <div className="flex gap-2">
@@ -41,8 +41,8 @@ export default function Home() {
           <button
             type="button"
             onClick={handleAddBoard}
-            className="flex min-h-[200px] flex-col items-center justify-center rounded border p-2 text-2xl">
-            Add Board <FaPlus />
+            className="flex min-h-[200px] flex-col items-center justify-center rounded-xl border p-4 text-2xl">
+            New Board <FaPlus />
           </button>
         </div>
       </div>
