@@ -15,10 +15,8 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 import { FaArrowLeft, FaPencil } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
 import { PiDotsSix, PiDotsSixVertical } from "react-icons/pi";
-import { api, type RouterOutputs } from "~/trpc/react";
-
-type BucketType = RouterOutputs["bucket"]["readAll"][number];
-type TaskType = BucketType["tasks"][number];
+import { api } from "~/trpc/react";
+import { type BucketType, type TaskType } from "~/trpc/types";
 
 export default function BoardView({
   params,
@@ -75,7 +73,7 @@ export default function BoardView({
   };
 
   return (
-    <div className="flex flex-col gap-8 overflow-x-auto">
+    <div className="flex flex-1 flex-col gap-8 overflow-hidden">
       {/* menu across the top */}
       <div className="fixed w-full p-2">
         <div className="flex justify-between">
@@ -92,8 +90,8 @@ export default function BoardView({
         </div>
       </div>
 
-      <div className="m-4 mt-16 flex flex-1 gap-8">
-        <div ref={bucketListRef} className="flex flex-1 gap-4">
+      <div className="mt-16 flex flex-1 gap-8 overflow-x-auto overflow-y-hidden p-4">
+        <div ref={bucketListRef} className="flex flex-1 items-start gap-4">
           {buckets.map((bucket) => (
             <Bucket
               key={bucket.id}
@@ -184,45 +182,52 @@ const Bucket = ({
 
   return (
     <>
-      <div className="min-w-[350px] rounded-xl border p-2">
-        <div className="flex justify-center">
-          <PiDotsSix className="drag-handle mx-1 cursor-grab" />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <h4>{bucket.name}</h4>
-            <button type="button" onClick={() => setBucketToEdit(bucket)}>
-              <FaPencil className="text-gray-600" />
+      <div className="flex max-h-full min-w-[350px] flex-1 flex-col overflow-hidden rounded-xl border">
+        <div className="p-2">
+          <div className="flex justify-center">
+            <PiDotsSix className="drag-handle mx-1 cursor-grab" />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <h4>{bucket.name}</h4>
+              <button type="button" onClick={() => setBucketToEdit(bucket)}>
+                <FaPencil className="text-gray-600" />
+              </button>
+            </div>
+            <button type="button" onClick={handleDeleteBucket}>
+              <FaTrash className="text-red-400" />
             </button>
           </div>
-          <button type="button" onClick={handleDeleteBucket}>
-            <FaTrash className="text-red-400" />
-          </button>
-        </div>
 
-        <span className="text-sm text-gray-300">{bucket.description}</span>
+          <span className="text-sm text-gray-300">{bucket.description}</span>
 
-        <div className="mt-4 flex">
-          <input
-            type="text"
-            value={task}
-            placeholder="Add task..."
-            onChange={(e) => setTask(e.target.value)}
-            onKeyDown={(e) => (e.key === "Enter" ? handleAddTask() : null)}
-            className="rounded-r-none"
-          />
-          <button
-            type="button"
-            onClick={handleAddTask}
-            className="rounded-r-xl bg-orange-400">
-            <FaPlus className="mx-2 text-2xl" />
-          </button>
+          <div className="mt-4 flex">
+            <input
+              type="text"
+              value={task}
+              placeholder="Add task..."
+              onChange={(e) => setTask(e.target.value)}
+              onKeyDown={(e) => (e.key === "Enter" ? handleAddTask() : null)}
+              className="rounded-r-none"
+            />
+            <button
+              type="button"
+              onClick={handleAddTask}
+              className="rounded-r-xl">
+              <FaPlus className="mx-2 text-2xl" />
+            </button>
+          </div>
         </div>
 
         <div
           data-bucket-id={bucket.id}
           ref={taskListRef}
-          className="my-2 flex min-h-64 flex-col gap-2">
+          className={`my-2 flex h-full min-h-12 flex-col gap-2 overflow-y-auto p-1 ${tasks.length > 0 ? "pb-24" : ""}`}>
+          {tasks.length === 0 && (
+            <div className="mx-2 flex items-center justify-center rounded bg-stone-800 p-2 text-gray-300">
+              No tasks
+            </div>
+          )}
           {tasks.map((task) => (
             <Task key={task.id} task={task} />
           ))}
@@ -280,7 +285,7 @@ const Task = ({ task }: { task: TaskType }) => {
 
   return (
     <>
-      <div className="border-1 flex items-center rounded border border-gray-500">
+      <div className="border-1 mx-2 flex items-center rounded border border-gray-500">
         <PiDotsSixVertical className="drag-handle mx-1 cursor-grab" />
         <div className="flex flex-1 items-center justify-between py-2 pr-2">
           <div className="flex items-center gap-1">
@@ -335,7 +340,7 @@ const NewBucket = ({ boardId }: { boardId: string }) => {
   };
 
   return (
-    <div className="flex min-w-[350px] flex-col gap-2 rounded border p-2">
+    <div className="flex h-fit min-w-[350px] flex-1 flex-col justify-start gap-2 rounded-xl border p-2 pb-12">
       <input
         type="text"
         value={name}

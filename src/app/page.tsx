@@ -10,10 +10,8 @@ import {
 } from "react";
 import { FaPencil, FaPlus, FaTrash } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
-import { api, type RouterInputs, type RouterOutputs } from "~/trpc/react";
-
-type BoardType = RouterOutputs["board"]["readAll"][number];
-type NewBoardType = RouterInputs["board"]["create"];
+import { api } from "~/trpc/react";
+import { type BoardType, type NewBoardType } from "~/trpc/types";
 
 export default function Home() {
   const { data: boards } = api.board.readAll.useQuery();

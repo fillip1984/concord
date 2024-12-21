@@ -18,7 +18,7 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
         <TRPCReactProvider>
-          <main className="flex min-h-screen overflow-hidden bg-stone-900 text-white">
+          <main className="flex h-screen overflow-hidden bg-stone-900 text-white">
             {children}
           </main>
         </TRPCReactProvider>
