@@ -18,7 +18,7 @@ export const boardRouter = createTRPCRouter({
             include: {
               tasks: {
                 orderBy: {
-                  priority: "asc",
+                  position: "asc",
                 },
               },
             },
