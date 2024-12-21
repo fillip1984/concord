@@ -16,7 +16,7 @@ import { FaArrowLeft, FaPencil } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
 import { PiDotsSix, PiDotsSixVertical } from "react-icons/pi";
 import { api } from "~/trpc/react";
-import { type BucketType, type TaskType } from "~/trpc/types";
+import { type BoardType, type BucketType, type TaskType } from "~/trpc/types";
 
 export default function BoardView({
   params,
@@ -100,7 +100,7 @@ export default function BoardView({
             />
           ))}
         </div>
-        {board && <NewBucket boardId={board.id} />}
+        {board && <NewBucket board={board} />}
       </div>
     </div>
   );
@@ -229,7 +229,7 @@ const Bucket = ({
             </div>
           )}
           {tasks.map((task) => (
-            <Task key={task.id} task={task} />
+            <TaskView key={task.id} task={task} setTasks={setTasks} />
           ))}
         </div>
         {/* <button
@@ -251,15 +251,43 @@ const Bucket = ({
   );
 };
 
-const Task = ({ task }: { task: TaskType }) => {
+const TaskView = ({
+  task,
+  setTasks,
+}: {
+  task: TaskType;
+  setTasks: Dispatch<SetStateAction<TaskType[]>>;
+}) => {
   const [taskToEdit, setTaskToEdit] = useState<TaskType | null>(null);
   const utils = api.useUtils();
   const { mutate: updateTask } = api.task.update.useMutation({
+    onMutate: async (task) => {
+      // optimistically toggle complete of the task
+      await utils.board.readOne.cancel();
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === task.id ? { ...t, complete: !t.complete } : t,
+        ),
+      );
+    },
+    // TODO: skipped implementing rollback of optimistic update..., see: https://tanstack.com/query/v4/docs/framework/react/guides/optimistic-updates
     onSuccess: async () => {
       await utils.board.invalidate();
     },
   });
   const { mutate: deleteTask } = api.task.delete.useMutation({
+    onMutate: async (task) => {
+      // optimistically delete the task
+      await utils.board.readOne.cancel();
+      setTasks((prev) => prev.filter((t) => t.id !== task.id));
+      // return { prevState };
+    },
+    // TODO: skipped implementing rollback of optimistic update..., see: https://tanstack.com/query/v4/docs/framework/react/guides/optimistic-updates
+    // onError: (err, task, context) => {
+    //   if (context?.prevState) {
+    //     setTasks((prev) => [...prev, context?.prevState]);
+    //   }
+    // },
     onSuccess: async () => {
       await utils.board.invalidate();
     },
@@ -274,7 +302,7 @@ const Task = ({ task }: { task: TaskType }) => {
       id: task.id,
       text: task.text,
       description: task.description ?? "",
-      position: 0,
+      position: task.position,
       complete: !task.complete,
     });
   };
@@ -321,7 +349,7 @@ const Task = ({ task }: { task: TaskType }) => {
   );
 };
 
-const NewBucket = ({ boardId }: { boardId: string }) => {
+const NewBucket = ({ board }: { board: BoardType }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
@@ -334,9 +362,16 @@ const NewBucket = ({ boardId }: { boardId: string }) => {
 
   const handleCreateBucket = () => {
     console.log("Creating bucket");
-    createBucket({ name, description, position: 0, boardId });
-    setName("");
-    setDescription("");
+    if (board) {
+      createBucket({
+        name,
+        description,
+        position: board.buckets.length ?? 0,
+        boardId: board.id,
+      });
+      setName("");
+      setDescription("");
+    }
   };
 
   return (
@@ -345,12 +380,12 @@ const NewBucket = ({ boardId }: { boardId: string }) => {
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Name..."
+        placeholder="New bucket name..."
       />
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="Description..."
+        placeholder="New bucket description..."
       />
       <button
         type="button"

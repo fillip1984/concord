@@ -49,6 +49,7 @@ export const taskRouter = createTRPCRouter({
         data: {
           text: input.text,
           description: input.description,
+          position: input.position,
           complete: input.complete,
         },
       });
