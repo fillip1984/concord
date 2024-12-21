@@ -1,5 +1,7 @@
 "use client";
 
+import { format, parse } from "date-fns";
+import { BsCalendar4Event, BsFlag, BsTextLeft } from "react-icons/bs";
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
 import Link from "next/link";
 import {
@@ -17,6 +19,7 @@ import { IoIosClose } from "react-icons/io";
 import { PiDotsSix, PiDotsSixVertical } from "react-icons/pi";
 import { api } from "~/trpc/react";
 import { type BoardType, type BucketType, type TaskType } from "~/trpc/types";
+import { PriorityOption } from "@prisma/client";
 
 export default function BoardView({
   params,
@@ -302,8 +305,10 @@ const TaskView = ({
       id: task.id,
       text: task.text,
       description: task.description ?? "",
-      position: task.position,
       complete: !task.complete,
+      position: task.position,
+      dueDate: task.dueDate,
+      priority: task.priority,
     });
   };
   const handleTaskEdit = () => {
@@ -406,10 +411,16 @@ const TaskDetailsModal = ({
 }) => {
   const [text, setText] = useState("");
   const [description, setDescription] = useState("");
+  const [complete, setComplete] = useState(false);
+  const [dueDate, setDueDate] = useState("");
+  const [priority, setPriority] = useState<PriorityOption | null>();
 
   useEffect(() => {
     setText(task.text);
     setDescription(task.description ?? "");
+    setComplete(task.complete);
+    setDueDate(task.dueDate ? format(task.dueDate, "MM/dd/yyyy") : "");
+    setPriority(task.priority ? task.priority : null);
   }, [task]);
 
   const utils = api.useUtils();
@@ -424,10 +435,12 @@ const TaskDetailsModal = ({
     e.preventDefault();
     updateTask({
       id: task.id,
-      text,
-      description,
-      complete: task.complete,
+      text: text,
+      description: description,
       position: task.position,
+      complete: complete,
+      dueDate: parse(dueDate, "MM/dd/yyyy", new Date()),
+      priority: priority,
     });
   };
 
@@ -439,25 +452,64 @@ const TaskDetailsModal = ({
         className="absolute inset-0 z-[999] bg-gray-500/10 backdrop-blur-sm"></div>
 
       {/* Modal content */}
-      <div className="z-[1000] min-h-[400px] w-1/2 bg-stone-700">
-        <div className="flex items-center justify-between p-2">
-          <span>{task.text}</span>
+      <div className="z-[1000] min-h-[400px] w-4/5 bg-stone-700">
+        <div className="flex items-center justify-end p-2">
           <button type="button" onClick={() => setTaskToEdit(null)}>
-            <IoIosClose className="text-2xl" />
+            <IoIosClose className="text-4xl" />
           </button>
         </div>
 
         <form onSubmit={handleSave} className="flex flex-col gap-2 p-4">
           <div className="flex flex-col gap-2">
-            <input
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <div className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                className="h-6 w-6 rounded-full"
+                checked={complete}
+                onChange={() => setComplete(!complete)}
+              />
+              <input
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              />
+            </div>
+
+            <div className="flex gap-1">
+              <BsTextLeft className="text-2xl" />
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-center gap-1">
+              <BsCalendar4Event className="text-2xl" />
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-center gap-1">
+              <BsFlag className="text-2xl" />
+              <select
+                value={priority ?? ""}
+                onChange={(e) => setPriority(e.target.value as PriorityOption)}>
+                <option></option>
+                <option value={PriorityOption.LOWEST}>Lowest</option>
+                <option value={PriorityOption.LOW}>Low</option>
+                <option value={PriorityOption.MEDIUM}>Medium</option>
+                <option value={PriorityOption.HIGH}>High</option>
+                <option value={PriorityOption.HIGHEST}>Highest</option>
+                <option value={PriorityOption.URGENT}>Urgent</option>
+                <option value={PriorityOption.IMPORTANT}>Important</option>
+                <option value={PriorityOption.URGENT_AND_IMPORTANT}>
+                  Urgent and Important
+                </option>
+              </select>
+            </div>
           </div>
 
           <div>

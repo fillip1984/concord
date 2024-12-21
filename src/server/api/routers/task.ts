@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
+import { PriorityOption } from "@prisma/client";
 
 export const taskRouter = createTRPCRouter({
   readAll: publicProcedure.query(async ({ ctx }) => {
@@ -37,8 +38,10 @@ export const taskRouter = createTRPCRouter({
         id: z.string().min(1),
         text: z.string().min(1),
         description: z.string().min(1),
-        position: z.number(),
         complete: z.boolean(),
+        position: z.number(),
+        dueDate: z.date().nullish(),
+        priority: z.nativeEnum(PriorityOption).nullish(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -49,8 +52,10 @@ export const taskRouter = createTRPCRouter({
         data: {
           text: input.text,
           description: input.description,
-          position: input.position,
           complete: input.complete,
+          position: input.position,
+          dueDate: input.dueDate,
+          priority: input.priority,
         },
       });
     }),
