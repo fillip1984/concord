@@ -36,6 +36,11 @@ export default function BoardView({
       await utils.board.invalidate();
     },
   });
+  const { mutate: reoderTasks } = api.task.reoder.useMutation({
+    onSuccess: async () => {
+      await utils.board.invalidate();
+    },
+  });
 
   // DND
   const [bucketListRef, buckets, setBuckets] = useDragAndDrop<
@@ -50,7 +55,6 @@ export default function BoardView({
   });
   useEffect(() => {
     if (board && board.buckets) {
-      console.log("reload");
       setBuckets(board.buckets);
     }
   }, [board, setBuckets]);
@@ -61,6 +65,13 @@ export default function BoardView({
     });
     console.log({ updates });
     reoderBuckets(updates);
+  };
+
+  const handleTaskReorder = (tasksToUpdate: TaskType[]) => {
+    const updates = tasksToUpdate.map((t, i) => {
+      return { id: t.id, position: i, bucketId: t.bucketId };
+    });
+    reoderTasks(updates);
   };
 
   return (
@@ -83,7 +94,11 @@ export default function BoardView({
       <div className="m-4 mt-16 flex flex-1 gap-8">
         <div ref={bucketListRef} className="flex flex-1 gap-4">
           {buckets.map((bucket) => (
-            <Bucket key={bucket.id} bucket={bucket} />
+            <Bucket
+              key={bucket.id}
+              bucket={bucket}
+              handleTaskReorder={handleTaskReorder}
+            />
           ))}
         </div>
         {board && <NewBucket boardId={board.id} />}
@@ -92,7 +107,13 @@ export default function BoardView({
   );
 }
 
-const Bucket = ({ bucket }: { bucket: BucketType }) => {
+const Bucket = ({
+  bucket,
+  handleTaskReorder,
+}: {
+  bucket: BucketType;
+  handleTaskReorder: (tasksToUpdate: TaskType[]) => void;
+}) => {
   const [bucketToEdit, setBucketToEdit] = useState<BucketType | null>(null);
 
   const utils = api.useUtils();
@@ -111,11 +132,7 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
   //     await utils.board.invalidate();
   //   },
   // });
-  const { mutate: reoderTasks } = api.task.reoder.useMutation({
-    onSuccess: async () => {
-      await utils.board.invalidate();
-    },
-  });
+
   const handleDeleteBucket = () => {
     console.log(`deleting bucket with id ${bucket.id}`);
     deleteBucket({ id: bucket.id });
@@ -146,24 +163,23 @@ const Bucket = ({ bucket }: { bucket: BucketType }) => {
     group: "tasks",
     dragHandle: ".drag-handle",
     onDragend: (data) => {
-      console.log({ msg: "drag end", data });
+      const draggedTask = data.draggedNode.data.value as TaskType;
+      const initialParent = draggedTask.bucketId;
+      // console.log({ msg: "drag ended", initialParent, newParent });
+      const newParent = data.parent.el.dataset.bucketId;
+      let tasksToUpdate = data.values as TaskType[];
+      if (newParent && newParent !== initialParent) {
+        // update bucketId if the task moved buckets
+        tasksToUpdate = tasksToUpdate.map((task) =>
+          task.id === draggedTask.id ? { ...task, bucketId: newParent } : task,
+        );
+      }
+      handleTaskReorder(tasksToUpdate);
     },
-    // onDragend(data) {
-    //   console.log("drag end of task");
-    //   console.log({ data });
-    //   handleTaskReorder();
-    // },
   });
   useEffect(() => {
     setTasks(bucket.tasks);
   }, [bucket, setTasks]);
-
-  const handleTaskReorder = () => {
-    const updates = tasks.map((t, i) => {
-      return { id: t.id, position: i };
-    });
-    reoderTasks(updates);
-  };
 
   return (
     <>

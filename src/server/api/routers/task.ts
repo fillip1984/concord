@@ -67,7 +67,15 @@ export const taskRouter = createTRPCRouter({
       });
     }),
   reoder: publicProcedure
-    .input(z.array(z.object({ id: z.string().min(1), position: z.number() })))
+    .input(
+      z.array(
+        z.object({
+          id: z.string().min(1),
+          position: z.number(),
+          bucketId: z.string(),
+        }),
+      ),
+    )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.$transaction(async (tx) => {
         for (const task of input) {
@@ -77,6 +85,7 @@ export const taskRouter = createTRPCRouter({
             },
             data: {
               position: task.position,
+              bucketId: task.bucketId,
             },
           });
         }
