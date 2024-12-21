@@ -76,6 +76,7 @@ export default function BoardView({
 
   return (
     <div className="flex flex-col gap-8 overflow-x-auto">
+      {/* menu across the top */}
       <div className="fixed w-full p-2">
         <div className="flex justify-between">
           <Link
@@ -218,7 +219,10 @@ const Bucket = ({
           </button>
         </div>
 
-        <div ref={taskListRef} className="my-2 flex min-h-64 flex-col gap-2">
+        <div
+          data-bucket-id={bucket.id}
+          ref={taskListRef}
+          className="my-2 flex min-h-64 flex-col gap-2">
           {tasks.map((task) => (
             <Task key={task.id} task={task} />
           ))}
