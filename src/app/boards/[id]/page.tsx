@@ -28,9 +28,8 @@ import TextareaAutosize from "react-textarea-autosize";
 import { api } from "~/trpc/react";
 import {
   type BucketType,
-  type BoardType,
-  type TaskType,
   type ChecklistItemType,
+  type TaskType,
 } from "~/trpc/types";
 
 export default function BoardView({
@@ -39,19 +38,22 @@ export default function BoardView({
   params: Promise<{ id: string }>;
 }) {
   const boardParams = use(params);
+  const { data } = api.bucket.readAll.useQuery(
+    {
+      boardId: boardParams.id,
+    },
+    { enabled: !!boardParams.id },
+  );
 
-  const { data: board } = api.board.readOne.useQuery({
-    id: boardParams.id,
-  });
   const utils = api.useUtils();
   const { mutate: reoderBuckets } = api.bucket.reoder.useMutation({
     onSuccess: async () => {
-      await utils.board.invalidate();
+      await utils.bucket.invalidate();
     },
   });
-  const { mutate: reoderTasks } = api.task.reoder.useMutation({
+  const { mutate: reoderTasks } = api.bucket.reoder.useMutation({
     onSuccess: async () => {
-      await utils.board.invalidate();
+      await utils.bucket.invalidate();
     },
   });
 
@@ -67,16 +69,15 @@ export default function BoardView({
     },
   });
   useEffect(() => {
-    if (board && board.buckets) {
-      setBuckets(board.buckets);
+    if (data) {
+      setBuckets(data);
     }
-  }, [board, setBuckets]);
+  }, [data, setBuckets]);
 
   const handleBucketReorder = () => {
     const updates = buckets.map((b, i) => {
       return { id: b.id, position: i };
     });
-    console.log({ updates });
     reoderBuckets(updates);
   };
 
@@ -115,7 +116,9 @@ export default function BoardView({
             />
           ))}
         </div>
-        {board && <NewBucket board={board} />}
+        {boardParams && buckets && (
+          <NewBucket boardId={boardParams.id} bucketCount={buckets.length} />
+        )}
       </div>
     </div>
   );
@@ -133,17 +136,17 @@ const Bucket = ({
   const utils = api.useUtils();
   const { mutate: deleteBucket } = api.bucket.delete.useMutation({
     onSuccess: async () => {
-      await utils.board.invalidate();
+      await utils.bucket.invalidate();
     },
   });
   const { mutate: createTask } = api.task.create.useMutation({
     onSuccess: async () => {
-      await utils.board.invalidate();
+      await utils.bucket.invalidate();
     },
   });
   // const { mutate: updateTask } = api.task.update.useMutation({
   //   onSuccess: async () => {
-  //     await utils.board.invalidate();
+  //     await utils.bucket.invalidate();
   //   },
   // });
 
@@ -266,6 +269,59 @@ const Bucket = ({
   );
 };
 
+const NewBucket = ({
+  boardId,
+  bucketCount,
+}: {
+  boardId: string;
+  bucketCount: number;
+}) => {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  const utils = api.useUtils();
+  const { mutate: createBucket } = api.bucket.create.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
+
+  const handleCreateBucket = () => {
+    console.log("Creating bucket");
+
+    createBucket({
+      name,
+      description,
+      position: bucketCount,
+      boardId: boardId,
+    });
+    setName("");
+    setDescription("");
+  };
+
+  return (
+    <div className="flex h-fit min-w-[350px] flex-1 flex-col justify-start gap-2 rounded-xl border p-2 pb-12">
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="New bucket name..."
+      />
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="New bucket description..."
+      />
+      <button
+        type="button"
+        onClick={handleCreateBucket}
+        className="rounded bg-orange-500 px-4 py-2 text-2xl">
+        Add
+      </button>
+    </div>
+  );
+};
+
 const TaskView = ({
   task,
   setTasks,
@@ -278,7 +334,7 @@ const TaskView = ({
   const { mutate: updateTask } = api.task.update.useMutation({
     onMutate: async (task) => {
       // optimistically toggle complete of the task
-      await utils.board.readOne.cancel();
+      await utils.bucket.readAll.cancel();
       setTasks((prev) =>
         prev.map((t) =>
           t.id === task.id ? { ...t, complete: !t.complete } : t,
@@ -287,13 +343,13 @@ const TaskView = ({
     },
     // TODO: skipped implementing rollback of optimistic update..., see: https://tanstack.com/query/v4/docs/framework/react/guides/optimistic-updates
     onSuccess: async () => {
-      await utils.board.invalidate();
+      await utils.bucket.invalidate();
     },
   });
   const { mutate: deleteTask } = api.task.delete.useMutation({
     onMutate: async (task) => {
       // optimistically delete the task
-      await utils.board.readOne.cancel();
+      await utils.bucket.readAll.cancel();
       setTasks((prev) => prev.filter((t) => t.id !== task.id));
       // return { prevState };
     },
@@ -304,7 +360,7 @@ const TaskView = ({
     //   }
     // },
     onSuccess: async () => {
-      await utils.board.invalidate();
+      await utils.bucket.invalidate();
     },
   });
   const handleDeleteTask = () => {
@@ -370,54 +426,6 @@ const TaskView = ({
   );
 };
 
-const NewBucket = ({ board }: { board: BoardType }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-
-  const utils = api.useUtils();
-  const { mutate: createBucket } = api.bucket.create.useMutation({
-    onSuccess: async () => {
-      await utils.board.invalidate();
-    },
-  });
-
-  const handleCreateBucket = () => {
-    console.log("Creating bucket");
-    if (board) {
-      createBucket({
-        name,
-        description,
-        position: board.buckets.length ?? 0,
-        boardId: board.id,
-      });
-      setName("");
-      setDescription("");
-    }
-  };
-
-  return (
-    <div className="flex h-fit min-w-[350px] flex-1 flex-col justify-start gap-2 rounded-xl border p-2 pb-12">
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="New bucket name..."
-      />
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="New bucket description..."
-      />
-      <button
-        type="button"
-        onClick={handleCreateBucket}
-        className="rounded bg-orange-500 px-4 py-2 text-2xl">
-        Add
-      </button>
-    </div>
-  );
-};
-
 const TaskDetailsModal = ({
   task,
   setTaskToEdit,
@@ -442,7 +450,7 @@ const TaskDetailsModal = ({
   const utils = api.useUtils();
   const { mutate: updateTask } = api.task.update.useMutation({
     onSuccess: async () => {
-      void utils.board.invalidate();
+      void utils.bucket.invalidate();
       setTaskToEdit(null);
     },
   });
@@ -531,7 +539,7 @@ const TaskDetailsModal = ({
 
             <div className="flex">
               <BsListTask className="w-6 text-2xl" />
-              <ChecklistView checklistItems={task.checklistItems} />
+              {/* <ChecklistView checklistItems={task.checklistItems} /> */}
             </div>
           </div>
 
@@ -595,7 +603,7 @@ const BucketDetailsModal = ({
   const utils = api.useUtils();
   const { mutate: updateBucket } = api.bucket.update.useMutation({
     onSuccess: async () => {
-      void utils.board.invalidate();
+      void utils.bucket.invalidate();
       setBucketToEdit(null);
     },
   });

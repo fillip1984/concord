@@ -4,13 +4,13 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { PriorityOption } from "@prisma/client";
 
 export const taskRouter = createTRPCRouter({
-  readAll: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.task.findMany({
-      orderBy: {
-        text: "asc",
-      },
-    });
-  }),
+  // readAll: publicProcedure.query(async ({ ctx }) => {
+  //   return await ctx.db.task.findMany({
+  //     orderBy: {
+  //       text: "asc",
+  //     },
+  //   });
+  // }),
   create: publicProcedure
     .input(
       z.object({

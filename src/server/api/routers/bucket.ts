@@ -3,20 +3,25 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const bucketRouter = createTRPCRouter({
-  // readAll: publicProcedure.query(async ({ ctx }) => {
-  //   return await ctx.db.bucket.findMany({
-  //     include: {
-  //       tasks: {
-  //         orderBy: {
-  //           position: "asc",
-  //         },
-  //       },
-  //     },
-  //     orderBy: {
-  //       position: "asc",
-  //     },
-  //   });
-  // }),
+  readAll: publicProcedure
+    .input(z.object({ boardId: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.bucket.findMany({
+        where: {
+          boardId: input.boardId,
+        },
+        include: {
+          tasks: {
+            orderBy: {
+              position: "asc",
+            },
+          },
+        },
+        orderBy: {
+          position: "asc",
+        },
+      });
+    }),
   create: publicProcedure
     .input(
       z.object({
