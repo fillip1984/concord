@@ -1,55 +1,31 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { PriorityOption } from "@prisma/client";
 
-export const taskRouter = createTRPCRouter({
+export const checklistItemRouter = createTRPCRouter({
   // readAll: publicProcedure.query(async ({ ctx }) => {
-  //   return await ctx.db.task.findMany({
+  //   return await ctx.db.checklistitem.findMany({
   //     orderBy: {
   //       text: "asc",
   //     },
   //   });
   // }),
-  readOne: publicProcedure
-    .input(z.object({ id: z.string().min(1) }))
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.task.findFirst({
-        where: {
-          id: input.id,
-        },
-        include: {
-          checklistItems: {
-            orderBy: {
-              position: "asc",
-            },
-          },
-          comments: {
-            orderBy: {
-              posted: "desc",
-            },
-          },
-        },
-      });
-    }),
   create: publicProcedure
     .input(
       z.object({
         text: z.string().min(1),
-        description: z.string().min(1),
         complete: z.boolean(),
         position: z.number(),
-        bucketId: z.string().min(1),
+        taskId: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.db.task.create({
+      return await ctx.db.checklistItem.create({
         data: {
           text: input.text,
-          description: input.description,
           complete: input.complete,
           position: input.position,
-          bucketId: input.bucketId,
+          taskId: input.taskId,
         },
       });
     }),
@@ -58,25 +34,19 @@ export const taskRouter = createTRPCRouter({
       z.object({
         id: z.string().min(1),
         text: z.string().min(1),
-        description: z.string().min(1),
         complete: z.boolean(),
         position: z.number(),
-        dueDate: z.date().nullish(),
-        priority: z.nativeEnum(PriorityOption).nullish(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.db.task.update({
+      return await ctx.db.checklistItem.update({
         where: {
           id: input.id,
         },
         data: {
           text: input.text,
-          description: input.description,
           complete: input.complete,
           position: input.position,
-          dueDate: input.dueDate,
-          priority: input.priority,
         },
       });
     }),
@@ -87,7 +57,7 @@ export const taskRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.db.task.delete({
+      return await ctx.db.checklistItem.delete({
         where: {
           id: input.id,
         },
@@ -99,20 +69,18 @@ export const taskRouter = createTRPCRouter({
         z.object({
           id: z.string().min(1),
           position: z.number(),
-          bucketId: z.string(),
         }),
       ),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.$transaction(async (tx) => {
-        for (const task of input) {
-          await tx.task.update({
+        for (const checklistitem of input) {
+          await tx.checklistItem.update({
             where: {
-              id: task.id,
+              id: checklistitem.id,
             },
             data: {
-              position: task.position,
-              bucketId: task.bucketId,
+              position: checklistitem.position,
             },
           });
         }

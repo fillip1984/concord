@@ -1,6 +1,8 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { boardRouter } from "./routers/board";
 import { bucketRouter } from "./routers/bucket";
+import { checklistItemRouter } from "./routers/checklistItem";
+import { commentRouter } from "./routers/comment";
 import { taskRouter } from "./routers/task";
 
 /**
@@ -12,6 +14,8 @@ export const appRouter = createTRPCRouter({
   board: boardRouter,
   bucket: bucketRouter,
   task: taskRouter,
+  checklistItem: checklistItemRouter,
+  comment: commentRouter,
 });
 
 // export type definition of API

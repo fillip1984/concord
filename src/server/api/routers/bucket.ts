@@ -15,6 +15,18 @@ export const bucketRouter = createTRPCRouter({
             orderBy: {
               position: "asc",
             },
+            include: {
+              checklistItems: {
+                orderBy: {
+                  position: "asc",
+                },
+              },
+              comments: {
+                orderBy: {
+                  posted: "desc",
+                },
+              },
+            },
           },
         },
         orderBy: {

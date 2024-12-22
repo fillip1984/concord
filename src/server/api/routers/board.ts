@@ -15,33 +15,33 @@ export const boardRouter = createTRPCRouter({
       },
     });
   }),
-  readOne: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.board.findFirst({
-        where: {
-          id: input.id,
-        },
-        include: {
-          buckets: {
-            include: {
-              tasks: {
-                include: {
-                  checklistItems: {
-                    orderBy: {
-                      position: "asc",
-                    },
-                  },
-                },
-                orderBy: {
-                  position: "asc",
-                },
-              },
-            },
-          },
-        },
-      });
-    }),
+  // readOne: publicProcedure
+  //   .input(z.object({ id: z.string() }))
+  //   .query(async ({ ctx, input }) => {
+  //     return await ctx.db.board.findFirst({
+  //       where: {
+  //         id: input.id,
+  //       },
+  //       include: {
+  //         buckets: {
+  //           include: {
+  //             tasks: {
+  //               include: {
+  //                 checklistItems: {
+  //                   orderBy: {
+  //                     position: "asc",
+  //                   },
+  //                 },
+  //               },
+  //               orderBy: {
+  //                 position: "asc",
+  //               },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     });
+  //   }),
   create: publicProcedure
     .input(
       z.object({
