@@ -10,6 +10,9 @@ export const boardRouter = createTRPCRouter({
         name: true,
         description: true,
       },
+      orderBy: {
+        name: "asc",
+      },
     });
   }),
   readOne: publicProcedure

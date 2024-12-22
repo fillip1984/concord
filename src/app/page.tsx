@@ -11,19 +11,13 @@ import {
 import { FaPencil, FaPlus, FaTrash } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
 import { api } from "~/trpc/react";
-import {
-  type BoardSummaryType,
-  type BoardType,
-  type NewBoardType,
-} from "~/trpc/types";
+import { type BoardSummaryType } from "~/trpc/types";
 
 export default function Home() {
   const { data: boards } = api.board.readAll.useQuery();
-  const [boardToEdit, setBoardToEdit] = useState<
-    BoardType | NewBoardType | null
-  >(null);
+  const [boardToEdit, setBoardToEdit] = useState<BoardSummaryType | null>(null);
   const handleAddBoard = () => {
-    setBoardToEdit({ name: "", description: "" });
+    setBoardToEdit({ id: "new", name: "", description: "" });
   };
 
   return (
@@ -49,7 +43,7 @@ export default function Home() {
         </div>
       </div>
 
-      {boardToEdit && (
+      {boardToEdit !== null && (
         <BoardDetailsModal
           board={boardToEdit}
           setBoardToEdit={setBoardToEdit}
@@ -64,7 +58,7 @@ const BoardCard = ({
   setBoardToEdit,
 }: {
   board: BoardSummaryType;
-  setBoardToEdit: Dispatch<SetStateAction<BoardType | NewBoardType | null>>;
+  setBoardToEdit: Dispatch<SetStateAction<BoardSummaryType | null>>;
 }) => {
   const utils = api.useUtils();
   const { mutate: deleteBoard } = api.board.delete.useMutation({
@@ -95,7 +89,13 @@ const BoardCard = ({
             }}>
             <FaPencil className="text-gray-600" />
           </button>
-          <button type="button" onClick={() => handleDeleteBoard()}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleDeleteBoard();
+            }}>
             <FaTrash className="text-red-400" />
           </button>
         </div>
@@ -108,21 +108,27 @@ const BoardDetailsModal = ({
   board,
   setBoardToEdit,
 }: {
-  board: BoardType | NewBoardType;
-  setBoardToEdit: Dispatch<SetStateAction<BoardType | NewBoardType | null>>;
+  board: BoardSummaryType;
+  setBoardToEdit: Dispatch<SetStateAction<BoardSummaryType | null>>;
 }) => {
+  const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    if (board) {
-      setName(board.name);
-      setDescription(board.description);
-    }
+    setId(board.id);
+    setName(board.name);
+    setDescription(board.description);
   }, [board]);
 
   const utils = api.useUtils();
-  const { mutate: createboard } = api.board.create.useMutation({
+  const { mutate: createBoard } = api.board.create.useMutation({
+    onSuccess: async () => {
+      void utils.board.invalidate();
+      setBoardToEdit(null);
+    },
+  });
+  const { mutate: updateBoard } = api.board.update.useMutation({
     onSuccess: async () => {
       void utils.board.invalidate();
       setBoardToEdit(null);
@@ -131,12 +137,15 @@ const BoardDetailsModal = ({
 
   const handleSave = (e: FormEvent) => {
     e.preventDefault();
-    createboard({ name, description });
-    // updateboard({
-    //   id: board.id,
-    //   name,
-    //   description,
-    // });
+    if (id === "new") {
+      createBoard({ name, description });
+    } else {
+      updateBoard({
+        id: board.id,
+        name,
+        description,
+      });
+    }
   };
 
   return (
@@ -174,7 +183,8 @@ const BoardDetailsModal = ({
           <div>
             <button
               type="submit"
-              className="rounded bg-orange-400 px-4 py-2 text-2xl">
+              className="rounded bg-orange-400 px-4 py-2 text-2xl"
+              disabled={!name || !description}>
               Save
             </button>
           </div>
