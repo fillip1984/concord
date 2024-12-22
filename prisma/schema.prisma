@@ -55,7 +55,7 @@ model Task {
 
     comments Comment[]
 
-    checkListItems CheckListItem[]
+    checklistItems ChecklistItem[]
 }
 
 model TaskTags {
@@ -92,13 +92,14 @@ model Comment {
     taskId String
 }
 
-model CheckListItem {
+model ChecklistItem {
     id        String   @id @default(cuid())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     text     String
     complete Boolean @default(false)
+    position Int
 
     task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
     taskId String

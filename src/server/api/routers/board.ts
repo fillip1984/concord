@@ -4,7 +4,13 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const boardRouter = createTRPCRouter({
   readAll: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.board.findMany();
+    return await ctx.db.board.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+      },
+    });
   }),
   readOne: publicProcedure
     .input(z.object({ id: z.string() }))
@@ -17,6 +23,13 @@ export const boardRouter = createTRPCRouter({
           buckets: {
             include: {
               tasks: {
+                include: {
+                  checklistItems: {
+                    orderBy: {
+                      position: "asc",
+                    },
+                  },
+                },
                 orderBy: {
                   position: "asc",
                 },

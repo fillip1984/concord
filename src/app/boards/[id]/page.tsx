@@ -1,8 +1,8 @@
 "use client";
 
-import { format, parse } from "date-fns";
-import { BsCalendar4Event, BsFlag, BsTextLeft } from "react-icons/bs";
 import { useDragAndDrop } from "@formkit/drag-and-drop/react";
+import { PriorityOption } from "@prisma/client";
+import { format, parse } from "date-fns";
 import Link from "next/link";
 import {
   type Dispatch,
@@ -12,14 +12,26 @@ import {
   useEffect,
   useState,
 } from "react";
-import { BsFillFunnelFill } from "react-icons/bs";
+import {
+  BsCalendar4Event,
+  BsFillFunnelFill,
+  BsFlag,
+  BsListTask,
+  BsPlus,
+  BsTextLeft,
+} from "react-icons/bs";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { FaArrowLeft, FaPencil } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
-import { PiDotsSix, PiDotsSixVertical } from "react-icons/pi";
+import { PiDotsSix } from "react-icons/pi";
+import TextareaAutosize from "react-textarea-autosize";
 import { api } from "~/trpc/react";
-import { type BoardType, type BucketType, type TaskType } from "~/trpc/types";
-import { PriorityOption } from "@prisma/client";
+import {
+  type BucketType,
+  type BoardType,
+  type TaskType,
+  type ChecklistItemType,
+} from "~/trpc/types";
 
 export default function BoardView({
   params,
@@ -319,19 +331,23 @@ const TaskView = ({
   return (
     <>
       <div className="border-1 mx-2 flex items-center rounded border border-gray-500">
-        <PiDotsSixVertical className="drag-handle mx-1 cursor-grab" />
+        {/* <PiDotsSixVertical className="drag-handle mx-1 cursor-grab" /> */}
         <div className="flex flex-1 items-center justify-between py-2 pr-2">
-          <div className="flex items-center gap-1">
-            <input
-              type="checkbox"
-              checked={task.complete}
-              onChange={handleToggleComplete}
-            />
-            <span
-              className={`${task.complete ? "line-through" : ""} cursor-pointer`}
-              onClick={handleToggleComplete}>
-              {task.text}
-            </span>
+          <div className="flex flex-col pl-2">
+            <div className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                checked={task.complete}
+                onChange={handleToggleComplete}
+                className="rounded-full"
+              />
+              <h5
+                className={`${task.complete ? "line-through" : ""} cursor-pointer`}
+                onClick={handleToggleComplete}>
+                {task.text}
+              </h5>
+            </div>
+            <p className="text-sm text-gray-400">{task.description}</p>
           </div>
           <div className="flex gap-1">
             <button
@@ -419,7 +435,7 @@ const TaskDetailsModal = ({
     setText(task.text);
     setDescription(task.description ?? "");
     setComplete(task.complete);
-    setDueDate(task.dueDate ? format(task.dueDate, "MM/dd/yyyy") : "");
+    setDueDate(task.dueDate ? format(task.dueDate, "yyyy-MM-dd") : "");
     setPriority(task.priority ? task.priority : null);
   }, [task]);
 
@@ -439,7 +455,7 @@ const TaskDetailsModal = ({
       description: description,
       position: task.position,
       complete: complete,
-      dueDate: parse(dueDate, "MM/dd/yyyy", new Date()),
+      dueDate: parse(dueDate, "yyyy-MM-dd", new Date()),
       priority: priority,
     });
   };
@@ -476,15 +492,17 @@ const TaskDetailsModal = ({
             </div>
 
             <div className="flex gap-1">
-              <BsTextLeft className="text-2xl" />
-              <textarea
+              <BsTextLeft className="w-6 text-2xl" />
+              <TextareaAutosize
+                minRows={3}
+                maxRows={10}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
 
             <div className="flex items-center gap-1">
-              <BsCalendar4Event className="text-2xl" />
+              <BsCalendar4Event className="w-6 text-2xl" />
               <input
                 type="date"
                 value={dueDate}
@@ -493,7 +511,7 @@ const TaskDetailsModal = ({
             </div>
 
             <div className="flex items-center gap-1">
-              <BsFlag className="text-2xl" />
+              <BsFlag className="w-6 text-2xl" />
               <select
                 value={priority ?? ""}
                 onChange={(e) => setPriority(e.target.value as PriorityOption)}>
@@ -510,6 +528,11 @@ const TaskDetailsModal = ({
                 </option>
               </select>
             </div>
+
+            <div className="flex">
+              <BsListTask className="w-6 text-2xl" />
+              <ChecklistView checklistItems={task.checklistItems} />
+            </div>
           </div>
 
           <div>
@@ -521,6 +544,35 @@ const TaskDetailsModal = ({
           </div>
         </form>
       </div>
+    </div>
+  );
+};
+
+const ChecklistView = ({
+  checklistItems,
+}: {
+  checklistItems: ChecklistItemType[];
+}) => {
+  const [newChecklistItem, setNewChecklistItem] = useState("");
+
+  const handleAddChecklistItem = () => {
+    console.log("working on this");
+  };
+
+  return (
+    <div className="flex w-full items-center">
+      <input
+        type="text"
+        value={newChecklistItem}
+        onChange={(e) => setNewChecklistItem(e.target.value)}
+        className="rounded-r-none"
+      />
+      <button
+        onClick={handleAddChecklistItem}
+        type="button"
+        className="h-full rounded-r bg-orange-400">
+        <BsPlus className="text-2xl" />
+      </button>
     </div>
   );
 };

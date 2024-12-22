@@ -11,7 +11,11 @@ import {
 import { FaPencil, FaPlus, FaTrash } from "react-icons/fa6";
 import { IoIosClose } from "react-icons/io";
 import { api } from "~/trpc/react";
-import { type BoardType, type NewBoardType } from "~/trpc/types";
+import {
+  type BoardSummaryType,
+  type BoardType,
+  type NewBoardType,
+} from "~/trpc/types";
 
 export default function Home() {
   const { data: boards } = api.board.readAll.useQuery();
@@ -59,7 +63,7 @@ const BoardCard = ({
   board,
   setBoardToEdit,
 }: {
-  board: BoardType;
+  board: BoardSummaryType;
   setBoardToEdit: Dispatch<SetStateAction<BoardType | NewBoardType | null>>;
 }) => {
   const utils = api.useUtils();
@@ -111,8 +115,10 @@ const BoardDetailsModal = ({
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    setName(board.name);
-    setDescription(board.description);
+    if (board) {
+      setName(board.name);
+      setDescription(board.description);
+    }
   }, [board]);
 
   const utils = api.useUtils();
