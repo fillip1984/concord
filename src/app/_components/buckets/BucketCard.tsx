@@ -7,13 +7,7 @@ import { type BucketType, type TaskType } from "~/trpc/types";
 import TaskCard from "../tasks/TaskCard";
 import BucketDetailsModal from "./BucketDetailsModal";
 
-export default function BucketCard({
-  bucket,
-  handleTaskReorder,
-}: {
-  bucket: BucketType;
-  handleTaskReorder: (tasksToUpdate: TaskType[]) => void;
-}) {
+export default function BucketCard({ bucket }: { bucket: BucketType }) {
   const [bucketToEdit, setBucketToEdit] = useState<BucketType | null>(null);
 
   const utils = api.useUtils();
@@ -32,6 +26,17 @@ export default function BucketCard({
   //     await utils.bucket.invalidate();
   //   },
   // });
+  const { mutate: reoderTasks } = api.task.reoder.useMutation({
+    onSuccess: async () => {
+      await utils.bucket.invalidate();
+    },
+  });
+  const handleTaskReorder = (tasksToUpdate: TaskType[]) => {
+    const updates = tasksToUpdate.map((t, i) => {
+      return { id: t.id, position: i, bucketId: t.bucketId };
+    });
+    reoderTasks(updates);
+  };
 
   const handleDeleteBucket = () => {
     console.log(`deleting bucket with id ${bucket.id}`);
@@ -61,7 +66,6 @@ export default function BucketCard({
     TaskType
   >(bucket.tasks, {
     group: "tasks",
-    dragHandle: ".drag-handle",
     onDragend: (data) => {
       const draggedTask = data.draggedNode.data.value as TaskType;
       const initialParent = draggedTask.bucketId;

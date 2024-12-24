@@ -8,7 +8,7 @@ import { FaArrowLeft } from "react-icons/fa6";
 import BucketCard from "~/app/_components/buckets/BucketCard";
 import NewBucketCard from "~/app/_components/buckets/NewBucketCard";
 import { api } from "~/trpc/react";
-import { type BucketType, type TaskType } from "~/trpc/types";
+import { type BucketType } from "~/trpc/types";
 
 export default function BoardView({
   params,
@@ -25,11 +25,6 @@ export default function BoardView({
 
   const utils = api.useUtils();
   const { mutate: reoderBuckets } = api.bucket.reoder.useMutation({
-    onSuccess: async () => {
-      await utils.bucket.invalidate();
-    },
-  });
-  const { mutate: reoderTasks } = api.bucket.reoder.useMutation({
     onSuccess: async () => {
       await utils.bucket.invalidate();
     },
@@ -59,13 +54,6 @@ export default function BoardView({
     reoderBuckets(updates);
   };
 
-  const handleTaskReorder = (tasksToUpdate: TaskType[]) => {
-    const updates = tasksToUpdate.map((t, i) => {
-      return { id: t.id, position: i, bucketId: t.bucketId };
-    });
-    reoderTasks(updates);
-  };
-
   return (
     <div className="flex flex-1 flex-col gap-8 overflow-hidden">
       {/* menu across the top */}
@@ -87,11 +75,7 @@ export default function BoardView({
       <div className="mt-16 flex flex-1 gap-8 overflow-x-auto overflow-y-hidden p-4">
         <div ref={bucketListRef} className="flex flex-1 items-start gap-4">
           {buckets.map((bucket) => (
-            <BucketCard
-              key={bucket.id}
-              bucket={bucket}
-              handleTaskReorder={handleTaskReorder}
-            />
+            <BucketCard key={bucket.id} bucket={bucket} />
           ))}
         </div>
         {boardParams && buckets && (
