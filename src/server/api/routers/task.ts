@@ -36,7 +36,7 @@ export const taskRouter = createTRPCRouter({
     .input(
       z.object({
         text: z.string().min(1),
-        description: z.string().min(1),
+        description: z.string().nullish(),
         complete: z.boolean(),
         position: z.number(),
         bucketId: z.string().min(1),

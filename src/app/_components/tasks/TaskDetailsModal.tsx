@@ -17,6 +17,7 @@ import {
   BsTrash,
 } from "react-icons/bs";
 import { IoIosClose } from "react-icons/io";
+import { PiDotsSixVerticalBold } from "react-icons/pi";
 import TextareaAutosize from "react-textarea-autosize";
 import { useDebounceValue } from "usehooks-ts";
 import { api } from "~/trpc/react";
@@ -199,6 +200,12 @@ const ChecklistView = ({ taskId }: { taskId: string }) => {
           type="text"
           value={newChecklistItem}
           onChange={(e) => setNewChecklistItem(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleAddChecklistItem();
+            }
+          }}
           placeholder="Add checklist item..."
           className="rounded-r-none"
         />
@@ -259,6 +266,7 @@ const ChecklistItemRow = ({
 
   return (
     <div className="flex items-center gap-2">
+      <PiDotsSixVerticalBold />
       <input
         type="checkbox"
         checked={checklistItem.complete}

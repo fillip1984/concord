@@ -48,7 +48,6 @@ export default function BucketCard({ bucket }: { bucket: BucketType }) {
     console.log("adding task");
     createTask({
       text: task,
-      description: "TBD",
       complete: false,
       position: bucket.tasks.length,
       bucketId: bucket.id,
@@ -118,7 +117,7 @@ export default function BucketCard({ bucket }: { bucket: BucketType }) {
             <button
               type="button"
               onClick={handleAddTask}
-              className="rounded-r-xl">
+              className="rounded-r-xl bg-orange-500">
               <FaPlus className="mx-2 text-2xl" />
             </button>
           </div>
