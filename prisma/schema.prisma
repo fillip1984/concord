@@ -21,6 +21,18 @@ model Board {
     buckets Bucket[]
 }
 
+model List {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name String
+
+    parentListId String?
+    parentList   List?   @relation("ListRelations", fields: [parentListId], references: [id])
+    childLists   List[]  @relation("ListRelations")
+}
+
 model Bucket {
     id        String   @id @default(cuid())
     createdAt DateTime @default(now())

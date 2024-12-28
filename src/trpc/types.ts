@@ -1,6 +1,7 @@
 import { type RouterOutputs } from "./react";
 
 export type BoardSummaryType = RouterOutputs["board"]["readAll"][number];
+export type ListSummaryType = RouterOutputs["list"]["readAll"][number];
 export type BucketType = RouterOutputs["bucket"]["readAll"][number];
 export type TaskType = Extract<BucketType, { tasks: unknown }>["tasks"][number];
 export type ChecklistItemType = Extract<

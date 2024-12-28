@@ -4,6 +4,7 @@ import { bucketRouter } from "./routers/bucket";
 import { checklistItemRouter } from "./routers/checklistItem";
 import { commentRouter } from "./routers/comment";
 import { taskRouter } from "./routers/task";
+import { listRouter } from "./routers/list";
 
 /**
  * This is the primary router for your server.
@@ -12,6 +13,7 @@ import { taskRouter } from "./routers/task";
  */
 export const appRouter = createTRPCRouter({
   board: boardRouter,
+  list: listRouter,
   bucket: bucketRouter,
   task: taskRouter,
   checklistItem: checklistItemRouter,
