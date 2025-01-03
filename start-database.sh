@@ -16,9 +16,9 @@ if ! [ -x "$(command -v docker)" ]; then
   exit 1
 fi
 
-if ! docker info > /dev/null 2>&1; then
-  systemctl --user start docker-desktop
-fi
+# if ! docker info > /dev/null 2>&1; then
+#   systemctl --user start docker-desktop
+# fi
 
 if ! docker info > /dev/null 2>&1; then
   echo "Docker daemon is not running. Please start Docker and try again."
