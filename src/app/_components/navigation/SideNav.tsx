@@ -23,7 +23,9 @@ export default function SideNav() {
     console.log("adding list");
     addList({ name: listSearchAdd });
   };
-  const [listToEdit, setListToEdit] = useState<ListSummaryType>();
+  const [listToEdit, setListToEdit] = useState<
+    ListSummaryType | Omit<ListSummaryType, "childLists">
+  >();
 
   const mainNavItems = [
     {
@@ -72,6 +74,8 @@ export default function SideNav() {
             </Link>
           ))}
           <hr />
+
+          {/* lists */}
           <h4>Lists</h4>
 
           <div className="flex">
@@ -92,15 +96,18 @@ export default function SideNav() {
           {lists
             ?.filter((list) => list.parentListId === null)
             .map((list) => (
-              <>
-                <div key={list.id} className="flex justify-between gap-2">
+              <div key={list.id}>
+                <Link
+                  href={`/lists/${list.id}`}
+                  className="flex justify-between gap-2">
                   <span>{list.name}</span>
                   <button type="button" onClick={() => setListToEdit(list)}>
                     <FaPencil />
                   </button>
-                </div>
+                </Link>
                 {list.childLists?.map((childList) => (
-                  <div
+                  <Link
+                    href={`/lists/${childList.id}`}
                     key={childList.id}
                     className="ml-4 flex justify-between gap-2">
                     <span>{childList.name}</span>
@@ -109,9 +116,9 @@ export default function SideNav() {
                       onClick={() => setListToEdit(childList)}>
                       <FaPencil />
                     </button>
-                  </div>
+                  </Link>
                 ))}
-              </>
+              </div>
             ))}
         </div>
 
@@ -145,8 +152,12 @@ const ListDetailsModal = ({
   list,
   setListToEdit,
 }: {
-  list: ListSummaryType;
-  setListToEdit: Dispatch<SetStateAction<ListSummaryType | undefined>>;
+  list: ListSummaryType | Omit<ListSummaryType, "childLists">;
+  setListToEdit: Dispatch<
+    SetStateAction<
+      ListSummaryType | Omit<ListSummaryType, "childLists"> | undefined
+    >
+  >;
 }) => {
   const { data: lists } = api.list.readAll.useQuery();
   const [name, setName] = useState("");
