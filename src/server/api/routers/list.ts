@@ -9,7 +9,24 @@ export const listRouter = createTRPCRouter({
         id: true,
         name: true,
         parentListId: true,
-        childLists: true,
+        childLists: {
+          select: {
+            id: true,
+            name: true,
+            parentListId: true,
+          },
+        },
+        sections: {
+          select: {
+            name: true,
+            position: true,
+            tasks: {
+              select: {
+                text: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         name: "asc",
@@ -20,8 +37,21 @@ export const listRouter = createTRPCRouter({
     .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
       return await ctx.db.list.findFirst({
-        where: {
-          id: input.id,
+        where: { id: input.id },
+        select: {
+          id: true,
+          name: true,
+          sections: {
+            select: {
+              id: true,
+              name: true,
+              position: true,
+              tasks: true,
+            },
+          },
+        },
+        orderBy: {
+          name: "asc",
         },
       });
     }),

@@ -39,7 +39,7 @@ export const taskRouter = createTRPCRouter({
         description: z.string().nullish(),
         complete: z.boolean(),
         position: z.number(),
-        bucketId: z.string().min(1),
+        sectionId: z.string().min(1),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -49,7 +49,7 @@ export const taskRouter = createTRPCRouter({
           description: input.description,
           complete: input.complete,
           position: input.position,
-          bucketId: input.bucketId,
+          sectionId: input.sectionId,
         },
       });
     }),
@@ -99,7 +99,7 @@ export const taskRouter = createTRPCRouter({
         z.object({
           id: z.string().min(1),
           position: z.number(),
-          bucketId: z.string(),
+          sectionId: z.string(),
         }),
       ),
     )
@@ -112,7 +112,7 @@ export const taskRouter = createTRPCRouter({
             },
             data: {
               position: task.position,
-              bucketId: task.bucketId,
+              sectionId: task.sectionId,
             },
           });
         }

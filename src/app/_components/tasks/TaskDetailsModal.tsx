@@ -31,7 +31,7 @@ export default function TaskDetailsModal({
   task,
   setTaskToEdit,
 }: {
-  task: TaskType;
+  task: TaskType | undefined;
   setTaskToEdit: Dispatch<SetStateAction<TaskType | null>>;
 }) {
   const [text, setText] = useState("");
@@ -41,11 +41,13 @@ export default function TaskDetailsModal({
   const [priority, setPriority] = useState<PriorityOption | null>();
 
   useEffect(() => {
-    setText(task.text);
-    setDescription(task.description ?? "");
-    setComplete(task.complete);
-    setDueDate(task.dueDate ? format(task.dueDate, "yyyy-MM-dd") : "");
-    setPriority(task.priority ? task.priority : null);
+    if (task) {
+      setText(task.text);
+      setDescription(task.description ?? "");
+      setComplete(task.complete);
+      setDueDate(task.dueDate ? format(task.dueDate, "yyyy-MM-dd") : "");
+      setPriority(task.priority ? task.priority : null);
+    }
   }, [task]);
 
   const utils = api.useUtils();
@@ -58,15 +60,17 @@ export default function TaskDetailsModal({
 
   const handleSave = (e: FormEvent) => {
     e.preventDefault();
-    updateTask({
-      id: task.id,
-      text: text,
-      description: description,
-      position: task.position,
-      complete: complete,
-      dueDate: parse(dueDate, "yyyy-MM-dd", new Date()),
-      priority: priority,
-    });
+    if (task) {
+      updateTask({
+        id: task.id,
+        text: text,
+        description: description,
+        position: task.position,
+        complete: complete,
+        dueDate: parse(dueDate, "yyyy-MM-dd", new Date()),
+        priority: priority,
+      });
+    }
   };
 
   return (
@@ -148,10 +152,10 @@ export default function TaskDetailsModal({
             </div>
 
             <hr className="my-2" />
-            <ChecklistView taskId={task.id} />
+            {/* <ChecklistView taskId={task.id} /> */}
 
             <hr className="my-2" />
-            <CommentView taskId={task.id} />
+            {/* <CommentView taskId={task.id} /> */}
           </div>
         </form>
       </div>

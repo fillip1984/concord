@@ -3,8 +3,9 @@ import { boardRouter } from "./routers/board";
 import { bucketRouter } from "./routers/bucket";
 import { checklistItemRouter } from "./routers/checklistItem";
 import { commentRouter } from "./routers/comment";
-import { taskRouter } from "./routers/task";
 import { listRouter } from "./routers/list";
+import { sectionRouter } from "./routers/section";
+import { taskRouter } from "./routers/task";
 
 /**
  * This is the primary router for your server.
@@ -12,12 +13,13 @@ import { listRouter } from "./routers/list";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  board: boardRouter,
   list: listRouter,
-  bucket: bucketRouter,
+  section: sectionRouter,
   task: taskRouter,
   checklistItem: checklistItemRouter,
   comment: commentRouter,
+  board: boardRouter,
+  bucket: bucketRouter,
 });
 
 // export type definition of API
