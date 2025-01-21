@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { FaChevronDown } from "react-icons/fa6";
-import TaskQuickForm from "junk/TaskQuickForm";
+import { useEffect, useState } from "react";
+import { FaChevronDown, FaPlus } from "react-icons/fa6";
+import ListView from "~/app/_components/tasks/ListView";
 import { api } from "~/trpc/react";
-import { type SectionType } from "~/trpc/types";
+import { type ListSectionType, type SectionType } from "~/trpc/types";
 
-export default function ListView({ params }: { params: { id: string } }) {
-  const { data: list } = api.list.readOne.useQuery(
+export default function ListPage({ params }: { params: { id: string } }) {
+  const { data: list, isLoading } = api.list.readOne.useQuery(
     {
       id: params.id,
     },
@@ -34,39 +34,51 @@ export default function ListView({ params }: { params: { id: string } }) {
     setSectionToAddTaskTo(section);
   };
 
+  const [listSections, setListSections] = useState<ListSectionType[]>();
+  useEffect(() => {
+    if (list) {
+      // const overdueSection = {
+      //   heading: "Overdue",
+      //   tasks: tasks.filter(
+      //     (task) => task.dueDate && isBefore(task.dueDate, new Date()),
+      //   ),
+      // };
+      // const todaySection = {
+      //   heading: format(new Date(), "MMM dd E"),
+      //   tasks: tasks.filter(
+      //     (task) => task.dueDate && isEqual(task.dueDate, new Date()),
+      //   ),
+      // };
+      // setListSections([overdueSection, todaySection]);
+      setListSections(
+        list.sections.map((section) => {
+          return { heading: section.name, tasks: section.tasks };
+        }),
+      );
+    }
+  }, [list]);
+
   return (
     <div className="flex w-screen flex-1 justify-center">
-      <div className="flex flex-col gap-8 overflow-hidden bg-yellow-400">
-        {list?.name} <button onClick={handleAddSection}>Add Section</button>
-        <span>{list?.sections.length}</span>
-        <div className="mx-auto flex w-full flex-col gap-2 md:w-1/2">
-          {list?.sections.map((section) => (
-            <div key={section.id} className="bg-green-300">
-              {/* heading */}
-              <div className="flex items-center gap-6">
-                <FaChevronDown />
-                {section.name}
-              </div>
-
-              {/* task list */}
-              {section.tasks.map((task) => (
-                <div key={task.id}>{task.text}</div>
-              ))}
-
-              {/* footer actions */}
-              <button type="button" onClick={() => handleAddTask(section)}>
-                Add task
-              </button>
-              {sectionToAddTaskTo?.id === section.id && (
-                <TaskQuickForm
-                  section={section}
-                  dismiss={() => setSectionToAddTaskTo(undefined)}
-                />
-              )}
-            </div>
-          ))}
+      {isLoading && <span>Loading...</span>}
+      {!isLoading && (
+        <div className="flex flex-col gap-6">
+          <h4>{list?.name}</h4>
+          <button
+            type="button"
+            onClick={() => console.log("test")}
+            className="bg-orange-400 px-2 py-2">
+            test
+          </button>
+          <div>{listSections && <ListView listSections={listSections} />}</div>
+          <button
+            onClick={handleAddSection}
+            className="flex items-center gap-2">
+            <FaPlus className="text-red-400" />
+            <span className="text-gray-300">Add Section</span>
+          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }

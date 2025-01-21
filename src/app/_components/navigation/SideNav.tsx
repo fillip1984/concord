@@ -126,11 +126,11 @@ export default function SideNav() {
                     key={childList.id}
                     className="ml-4 flex justify-between gap-2">
                     <span>{childList.name}</span>
-                    <button
+                    {/* <button
                       type="button"
                       onClick={() => setListToEdit(childList)}>
                       <FaPencil />
-                    </button>
+                    </button> */}
                   </Link>
                 ))}
               </div>

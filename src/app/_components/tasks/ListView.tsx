@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { FaChevronDown } from "react-icons/fa6";
 import { type ListSectionType } from "~/trpc/types";
 
 export default function ListView({
@@ -17,24 +19,30 @@ export default function ListView({
 }
 
 const Section = ({ section }: { section: ListSectionType }) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   return (
     <div>
-      {section.heading}
-      <div>
-        {section.tasks.map((task) => (
-          <div key={task.id}>
-            <hr />
-            <div className="flex gap-2 py-2">
-              <input type="checkbox" className="rounded-full" />
-              <div className="flex flex-col">
-                <span className="text-xs">{task.text}</span>
-                <span>{task.description}</span>
-              </div>
-            </div>
-            <hr />
-          </div>
-        ))}
+      <div className="flex items-center gap-2">
+        <span>{section.heading}</span>
       </div>
+      {!isCollapsed && (
+        <div>
+          {section.tasks.map((task) => (
+            <div key={task.id}>
+              <hr />
+              <div className="flex gap-2 py-2">
+                <input type="checkbox" className="rounded-full" />
+                <div className="flex flex-col">
+                  <span className="text-xs">{task.text}</span>
+                  <span>{task.description}</span>
+                </div>
+              </div>
+              <hr />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
