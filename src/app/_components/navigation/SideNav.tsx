@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { BiCalendarWeek } from "react-icons/bi";
+import { BsLayoutSidebarInset } from "react-icons/bs";
 import { FaPencil, FaPlus, FaRegCalendar, FaTrash } from "react-icons/fa6";
 import { TbInbox, TbLogout, TbSearch } from "react-icons/tb";
 import { api } from "~/trpc/react";
@@ -31,12 +32,12 @@ export default function SideNav() {
     {
       label: "Search",
       icon: <TbSearch className="text-3xl" />,
-      href: "",
+      href: "/search",
     },
     {
       label: "Inbox",
       icon: <TbInbox className="text-3xl" />,
-      href: "",
+      href: "/inbox",
     },
     {
       label: "Today",
@@ -48,17 +49,31 @@ export default function SideNav() {
           </span>
         </span>
       ),
-      href: "",
+      href: "/",
     },
     {
       label: "Upcoming",
       icon: <BiCalendarWeek className="text-3xl" />,
-      href: "",
+      href: "/upcoming",
     },
   ];
+
+  const [sideNavOpen, setSideNavOpen] = useState(false);
+  const handleSideNavToggle = () => {
+    setSideNavOpen((prev) => !prev);
+  };
   return (
-    <>
-      <nav className="flex flex-col bg-orange-500 p-4 text-white">
+    <div className="absolute bottom-0 top-0">
+      {/* sidebar collapse */}
+      <div
+        className={`flex justify-end bg-orange-500 p-2 transition duration-300 ${sideNavOpen ? "" : "translate-x-[-85%] bg-inherit"}`}>
+        <button type="button" onClick={handleSideNavToggle}>
+          <BsLayoutSidebarInset className="text-2xl" />
+        </button>
+      </div>
+
+      <nav
+        className={`flex h-screen flex-col bg-orange-500 p-4 text-white transition duration-300 ${sideNavOpen ? "" : "-translate-x-full"}`}>
         {/* branding */}
         <h4>Concord</h4>
 
@@ -123,12 +138,12 @@ export default function SideNav() {
         </div>
 
         {/* bottom nav items */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col items-center justify-center gap-2">
           <button
             type="button"
             className="flex items-center gap-2 rounded bg-white/20 p-2 transition-colors hover:bg-white/10">
             <TbLogout className="text-3xl" />
-            <span>Log out</span>
+            <span className="sm:visible">Log out</span>
           </button>
         </div>
       </nav>
@@ -144,7 +159,7 @@ export default function SideNav() {
           <ListDetailsModal list={listToEdit} setListToEdit={setListToEdit} />
         </div>
       )}
-    </>
+    </div>
   );
 }
 

@@ -18,9 +18,9 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
         <TRPCReactProvider>
-          <div className="flex h-screen overflow-hidden">
+          <div className="flex h-screen w-screen overflow-hidden bg-stone-900 text-white">
             <SideNav />
-            <main className="flex flex-1 overflow-hidden bg-stone-900 text-white">
+            <main className="pt-8">
               {children}
               {/* <ReactQueryDevtoolsPanel /> */}
             </main>

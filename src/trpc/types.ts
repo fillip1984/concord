@@ -1,5 +1,10 @@
 import { type RouterOutputs } from "./react";
 
+export type ListSectionType = {
+  heading: string;
+  tasks: TaskType[];
+};
+
 // export type BoardSummaryType = RouterOutputs["board"]["readAll"][number];
 // export type BucketType = RouterOutputs["bucket"]["readAll"][number];
 export type ListSummaryType = RouterOutputs["list"]["readAll"][number];
