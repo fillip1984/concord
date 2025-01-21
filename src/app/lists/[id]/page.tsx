@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaChevronDown, FaPlus } from "react-icons/fa6";
+import { FaPlus } from "react-icons/fa6";
 import ListView from "~/app/_components/tasks/ListView";
 import { api } from "~/trpc/react";
 import { type ListSectionType, type SectionType } from "~/trpc/types";
@@ -52,26 +52,25 @@ export default function ListPage({ params }: { params: { id: string } }) {
       // setListSections([overdueSection, todaySection]);
       setListSections(
         list.sections.map((section) => {
-          return { heading: section.name, tasks: section.tasks };
+          return {
+            id: section.id,
+            heading: section.name,
+            tasks: section.tasks,
+          };
         }),
       );
     }
   }, [list]);
 
   return (
-    <div className="flex w-screen flex-1 justify-center">
+    <div className="flex w-screen flex-1">
       {isLoading && <span>Loading...</span>}
       {!isLoading && (
         <div className="flex flex-col gap-6">
           <h4>{list?.name}</h4>
-          <button
-            type="button"
-            onClick={() => console.log("test")}
-            className="bg-orange-400 px-2 py-2">
-            test
-          </button>
           <div>{listSections && <ListView listSections={listSections} />}</div>
           <button
+            type="button"
             onClick={handleAddSection}
             className="flex items-center gap-2">
             <FaPlus className="text-red-400" />

@@ -1,6 +1,7 @@
 import { type RouterOutputs } from "./react";
 
 export type ListSectionType = {
+  id: string;
   heading: string;
   tasks: TaskType[];
 };

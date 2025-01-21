@@ -15,18 +15,20 @@ export default function Upcoming() {
   useEffect(() => {
     if (tasks) {
       const overdueSection = {
+        id: "overdue",
         heading: "Overdue",
         tasks: tasks.filter(
           (task) => task.dueDate && isBefore(task.dueDate, new Date()),
         ),
       };
-      const todaySection = {
+      const upcomingSection = {
+        id: "upcoming",
         heading: format(new Date(), "MMM dd E"),
         tasks: tasks.filter(
           (task) => task.dueDate && isEqual(task.dueDate, new Date()),
         ),
       };
-      setListSections([overdueSection, todaySection]);
+      setListSections([overdueSection, upcomingSection]);
     }
   }, [tasks]);
 

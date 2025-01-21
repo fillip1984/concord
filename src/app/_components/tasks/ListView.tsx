@@ -11,7 +11,7 @@ export default function ListView({
     <div>
       <div className="flex flex-col gap-6">
         {listSections.map((listSection) => (
-          <Section key={listSection.heading} section={listSection} />
+          <Section key={listSection.id} section={listSection} />
         ))}
       </div>
     </div>
@@ -24,6 +24,9 @@ const Section = ({ section }: { section: ListSectionType }) => {
   return (
     <div>
       <div className="flex items-center gap-2">
+        <button type="button" onClick={() => console.log("testing")}>
+          <FaChevronDown />
+        </button>
         <span>{section.heading}</span>
       </div>
       {!isCollapsed && (

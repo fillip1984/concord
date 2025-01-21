@@ -27,12 +27,14 @@ export default function Today() {
   useEffect(() => {
     if (tasks) {
       const overdueSection = {
+        id: "overdue",
         heading: "Overdue",
         tasks: tasks.filter(
           (task) => task.dueDate && isBefore(task.dueDate, new Date()),
         ),
       };
       const todaySection = {
+        id: "today",
         heading: format(new Date(), "MMM dd E"),
         tasks: tasks.filter(
           (task) => task.dueDate && isEqual(task.dueDate, new Date()),
