@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import ListView from "~/app/_components/tasks/ListView";
 import { api } from "~/trpc/react";
-import { type ListSectionType, type SectionType } from "~/trpc/types";
+import {
+  ListDetailType,
+  type ListSectionType,
+  type SectionType,
+} from "~/trpc/types";
 
 export default function ListPage({ params }: { params: { id: string } }) {
   const { data: list, isLoading } = api.list.readOne.useQuery(
@@ -15,16 +19,6 @@ export default function ListPage({ params }: { params: { id: string } }) {
   );
 
   const utils = api.useUtils();
-  const { mutate: addSection } = api.section.create.useMutation({
-    onSuccess: async () => {
-      await utils.list.invalidate();
-    },
-  });
-
-  const handleAddSection = () => {
-    console.log("adding section");
-    addSection({ name: "No Section", listId: params.id, position: 0 });
-  };
 
   // edit task stuff
   const [sectionToAddTaskTo, setSectionToAddTaskTo] =
@@ -63,21 +57,49 @@ export default function ListPage({ params }: { params: { id: string } }) {
   }, [list]);
 
   return (
-    <div className="flex w-screen flex-1">
+    <div className="flex w-screen flex-1 justify-center pt-8">
       {isLoading && <span>Loading...</span>}
-      {!isLoading && (
-        <div className="flex flex-col gap-6">
+      {!isLoading && list && (
+        <div className="flex min-w-[600px] flex-col gap-6">
           <h4>{list?.name}</h4>
           <div>{listSections && <ListView listSections={listSections} />}</div>
-          <button
-            type="button"
-            onClick={handleAddSection}
-            className="flex items-center gap-2">
-            <FaPlus className="text-red-400" />
-            <span className="text-gray-300">Add Section</span>
-          </button>
+          <AddSection list={list} />
         </div>
       )}
     </div>
   );
 }
+
+const AddSection = ({ list }: { list: ListDetailType }) => {
+  const [name, setName] = useState("");
+  const handleAddSection = (name: string) => {
+    console.log("adding section");
+    if (list) {
+      addSection({ name, listId: list.id, position: 0 });
+    }
+  };
+  const utils = api.useUtils();
+  const { mutate: addSection } = api.section.create.useMutation({
+    onSuccess: async () => {
+      await utils.list.invalidate();
+      setName("");
+    },
+  });
+  return (
+    <div>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name this section..."
+      />
+      <button
+        type="button"
+        onClick={() => handleAddSection(name)}
+        className="flex items-center gap-2">
+        <FaPlus className="text-red-400" />
+        <span className="text-gray-300">Add Section</span>
+      </button>
+    </div>
+  );
+};
