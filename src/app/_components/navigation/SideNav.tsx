@@ -58,93 +58,96 @@ export default function SideNav() {
     },
   ];
 
-  const [sideNavOpen, setSideNavOpen] = useState(false);
+  const [isSideNavOpen, setIsSideNavOpen] = useState(false);
   const handleSideNavToggle = () => {
-    setSideNavOpen((prev) => !prev);
+    setIsSideNavOpen((prev) => !prev);
   };
   return (
-    <div className="absolute bottom-0 top-0">
-      {/* sidebar collapse */}
-      <div
-        className={`flex justify-end bg-orange-500 p-2 transition duration-300 ${sideNavOpen ? "" : "translate-x-[-85%] bg-inherit"}`}>
-        <button type="button" onClick={handleSideNavToggle}>
-          <BsLayoutSidebarInset className="text-2xl" />
-        </button>
-      </div>
-
+    <>
       <nav
-        className={`flex h-screen flex-col bg-orange-500 p-4 text-white transition duration-300 ${sideNavOpen ? "" : "-translate-x-full"}`}>
+        className={`flex flex-col bg-orange-500 p-4 text-white transition-all duration-300 ${isSideNavOpen ? "w-full" : "w-[82px]"}`}>
+        <div className="flex justify-end">
+          <button type="button" onClick={handleSideNavToggle}>
+            <BsLayoutSidebarInset className="text-2xl" />
+          </button>
+        </div>
+
         {/* branding */}
-        <h4>Concord</h4>
+        <div>
+          <h4>Concord</h4>
 
-        {/* main nav items*/}
-        <div className="mt-12 flex flex-1 flex-col gap-2">
-          {mainNavItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="flex items-center gap-2 rounded bg-white/20 p-2 transition-colors hover:bg-white/10">
-              {item.icon}
-              <span>{item.label}</span>
-            </Link>
-          ))}
-          <hr />
+          {/* main nav items*/}
+          <div className="mt-12 flex flex-1 flex-col gap-2">
+            {mainNavItems.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex items-center gap-2 rounded bg-white/20 p-2 transition-colors hover:bg-white/10">
+                {item.icon}
+                <span
+                  className={`${isSideNavOpen ? "opacity-100" : "opacity-0"}`}>
+                  {item.label}
+                </span>
+              </Link>
+            ))}
+            <hr />
 
-          {/* lists */}
-          <h4>Lists</h4>
+            {/* lists */}
+            <h4>Lists</h4>
 
-          <div className="flex">
-            <input
-              type="text"
-              value={listSearchAdd}
-              onChange={(e) => setListSearchAdd(e.target.value)}
-              placeholder="Search or add list..."
-              className="rounded-r-none text-sm"
-            />
-            <button
-              type="button"
-              onClick={handleAddList}
-              className="flex w-8 items-center justify-center rounded-r-lg border">
-              <FaPlus />
-            </button>
-          </div>
-          {lists
-            ?.filter((list) => list.parentListId === null)
-            .map((list) => (
-              <div key={list.id}>
-                <Link
-                  href={`/lists/${list.id}`}
-                  className="flex justify-between gap-2">
-                  <span>{list.name}</span>
-                  <button type="button" onClick={() => setListToEdit(list)}>
-                    <FaPencil />
-                  </button>
-                </Link>
-                {list.childLists?.map((childList) => (
+            <div className="flex">
+              <input
+                type="text"
+                value={listSearchAdd}
+                onChange={(e) => setListSearchAdd(e.target.value)}
+                placeholder="Search or add list..."
+                className="rounded-r-none text-sm"
+              />
+              <button
+                type="button"
+                onClick={handleAddList}
+                className="flex w-8 items-center justify-center rounded-r-lg border">
+                <FaPlus />
+              </button>
+            </div>
+            {lists
+              ?.filter((list) => list.parentListId === null)
+              .map((list) => (
+                <div key={list.id}>
                   <Link
-                    href={`/lists/${childList.id}`}
-                    key={childList.id}
-                    className="ml-4 flex justify-between gap-2">
-                    <span>{childList.name}</span>
-                    {/* <button
+                    href={`/lists/${list.id}`}
+                    className="flex justify-between gap-2">
+                    <span>{list.name}</span>
+                    <button type="button" onClick={() => setListToEdit(list)}>
+                      <FaPencil />
+                    </button>
+                  </Link>
+                  {list.childLists?.map((childList) => (
+                    <Link
+                      href={`/lists/${childList.id}`}
+                      key={childList.id}
+                      className="ml-4 flex justify-between gap-2">
+                      <span>{childList.name}</span>
+                      {/* <button
                       type="button"
                       onClick={() => setListToEdit(childList)}>
                       <FaPencil />
                     </button> */}
-                  </Link>
-                ))}
-              </div>
-            ))}
-        </div>
+                    </Link>
+                  ))}
+                </div>
+              ))}
+          </div>
 
-        {/* bottom nav items */}
-        <div className="flex flex-col items-center justify-center gap-2">
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded bg-white/20 p-2 transition-colors hover:bg-white/10">
-            <TbLogout className="text-3xl" />
-            <span className="sm:visible">Log out</span>
-          </button>
+          {/* bottom nav items */}
+          <div className="flex flex-col items-center justify-center gap-2">
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded bg-white/20 p-2 transition-colors hover:bg-white/10">
+              <TbLogout className="text-3xl" />
+              <span className="sm:visible">Log out</span>
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -159,7 +162,7 @@ export default function SideNav() {
           <ListDetailsModal list={listToEdit} setListToEdit={setListToEdit} />
         </div>
       )}
-    </div>
+    </>
   );
 }
 
