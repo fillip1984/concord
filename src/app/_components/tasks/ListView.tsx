@@ -4,9 +4,9 @@ import { FaChevronDown, FaPlus, FaTrashCan } from "react-icons/fa6";
 import { FiEdit3 } from "react-icons/fi";
 import { IoEllipsisHorizontalOutline } from "react-icons/io5";
 import { MdDriveFileMoveOutline } from "react-icons/md";
-import { type ListSectionType } from "~/trpc/types";
-import TaskCard from "./TaskCard";
 import { api } from "~/trpc/react";
+import { type ListSectionType, type TaskType } from "~/trpc/types";
+import TaskCard from "./TaskCard";
 
 export default function ListView({
   listSections,
@@ -106,20 +106,10 @@ const Section = ({ section }: { section: ListSectionType }) => {
         <>
           <div>
             {section.tasks.map((task) => (
-              <div key={task.id}>
-                <hr />
-                <div className="flex gap-2 py-2">
-                  <input type="checkbox" className="rounded-full" />
-                  <div className="flex flex-col">
-                    <span className="text-xs">{task.text}</span>
-                    <span>{task.description}</span>
-                  </div>
-                </div>
-                <hr />
-              </div>
+              <TaskRow key={task.id} task={task} />
             ))}
           </div>
-          <AddTask />
+          <AddTask section={section} />
         </>
       )}
 
@@ -152,7 +142,37 @@ const Section = ({ section }: { section: ListSectionType }) => {
   );
 };
 
-const AddTask = () => {
+const TaskRow = ({ task }: { task: TaskType }) => {
+  const utils = api.useUtils();
+  const { mutate: updateTask } = api.task.update.useMutation({
+    onSuccess: async () => {
+      await utils.list.invalidate();
+    },
+  });
+  const handleComplete = () => {
+    console.log("handling complete");
+    updateTask({ ...task, complete: true });
+  };
+  return (
+    <div key={task.id}>
+      <hr />
+      <div className="flex gap-2 py-2">
+        <input
+          type="checkbox"
+          onClick={handleComplete}
+          className="rounded-full"
+        />
+        <div className="flex flex-col">
+          <span className="text-xs">{task.text}</span>
+          <span>{task.description}</span>
+        </div>
+      </div>
+      <hr />
+    </div>
+  );
+};
+
+const AddTask = ({ section }: { section: ListSectionType }) => {
   const [isAddTaskCardVisible, setIsAddTaskCardVisible] = useState(false);
 
   return (
@@ -164,7 +184,12 @@ const AddTask = () => {
         <FaPlus />
         Add Task
       </button>
-      {isAddTaskCardVisible && <TaskCard />}
+      {isAddTaskCardVisible && (
+        <TaskCard
+          section={section}
+          dismiss={() => setIsAddTaskCardVisible(false)}
+        />
+      )}
     </>
   );
 };

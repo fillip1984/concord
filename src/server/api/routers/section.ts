@@ -51,25 +51,25 @@ export const sectionRouter = createTRPCRouter({
         },
       });
     }),
-  update: publicProcedure
-    .input(
-      z.object({
-        id: z.string().min(1),
-        name: z.string().min(1),
-        position: z.number(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      return await ctx.db.section.update({
-        where: {
-          id: input.id,
-        },
-        data: {
-          name: input.name,
-          position: input.position,
-        },
-      });
-    }),
+  // update: publicProcedure
+  //   .input(
+  //     z.object({
+  //       id: z.string().min(1),
+  //       name: z.string().min(1),
+  //       position: z.number(),
+  //     }),
+  //   )
+  //   .mutation(async ({ ctx, input }) => {
+  //     return await ctx.db.section.update({
+  //       where: {
+  //         id: input.id,
+  //       },
+  //       data: {
+  //         name: input.name,
+  //         position: input.position,
+  //       },
+  //     });
+  //   }),
   delete: publicProcedure
     .input(
       z.object({
@@ -83,20 +83,20 @@ export const sectionRouter = createTRPCRouter({
         },
       });
     }),
-  reoder: publicProcedure
-    .input(z.array(z.object({ id: z.string().min(1), position: z.number() })))
-    .mutation(async ({ ctx, input }) => {
-      await ctx.db.$transaction(async (tx) => {
-        for (const section of input) {
-          await tx.section.update({
-            where: {
-              id: section.id,
-            },
-            data: {
-              position: section.position,
-            },
-          });
-        }
-      });
-    }),
+  // reoder: publicProcedure
+  //   .input(z.array(z.object({ id: z.string().min(1), position: z.number() })))
+  //   .mutation(async ({ ctx, input }) => {
+  //     await ctx.db.$transaction(async (tx) => {
+  //       for (const section of input) {
+  //         await tx.section.update({
+  //           where: {
+  //             id: section.id,
+  //           },
+  //           data: {
+  //             position: section.position,
+  //           },
+  //         });
+  //       }
+  //     });
+  //   }),
 });

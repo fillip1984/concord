@@ -24,6 +24,7 @@ export const listRouter = createTRPCRouter({
               select: {
                 text: true,
               },
+              where: { complete: { not: true } },
             },
           },
         },
@@ -46,7 +47,9 @@ export const listRouter = createTRPCRouter({
               id: true,
               name: true,
               position: true,
-              tasks: true,
+              tasks: {
+                where: { complete: { not: true } },
+              },
             },
           },
         },

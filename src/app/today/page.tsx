@@ -7,7 +7,7 @@ import { type ListSectionType } from "~/trpc/types";
 import ListView from "../_components/tasks/ListView";
 
 export default function Today() {
-  const { data: tasks, isLoading } = api.task.readAll.useQuery();
+  const { data: tasks, isLoading } = api.task.today.useQuery();
   const [listSections, setListSections] = useState<ListSectionType[]>();
   // const [overdueSection, setOverdueSection] = useState<ListSectionType>();
   // const [todaySection, setTodaySection] = useState<ListSectionType>();
