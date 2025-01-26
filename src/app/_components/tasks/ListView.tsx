@@ -1,12 +1,12 @@
 import { useState } from "react";
+import { BiDuplicate } from "react-icons/bi";
 import { FaChevronDown, FaPlus, FaTrashCan } from "react-icons/fa6";
+import { FiEdit3 } from "react-icons/fi";
+import { IoEllipsisHorizontalOutline } from "react-icons/io5";
+import { MdDriveFileMoveOutline } from "react-icons/md";
 import { type ListSectionType } from "~/trpc/types";
 import TaskCard from "./TaskCard";
-import { useClick, useFloating, useInteractions } from "@floating-ui/react";
-import { MdDriveFileMoveOutline } from "react-icons/md";
-import { IoEllipsisHorizontalOutline } from "react-icons/io5";
-import { BiDuplicate } from "react-icons/bi";
-import { FiEdit3 } from "react-icons/fi";
+import { api } from "~/trpc/react";
 
 export default function ListView({
   listSections,
@@ -31,16 +31,21 @@ const Section = ({ section }: { section: ListSectionType }) => {
     setIsCollapsed((prev) => !prev);
   };
 
+  const utils = api.useUtils();
+  const { mutate: deleteSection } = api.section.delete.useMutation({
+    onSuccess: async () => {
+      await utils.list.invalidate();
+      // TODO: might need to add more here
+      setIsModalOpen(false);
+    },
+  });
+  const handleDeleteSection = () => {
+    console.log("deleting section");
+    deleteSection({ id: section.id });
+  };
+
   const [isOpen, setIsOpen] = useState(false);
-
-  // const { refs, floatingStyles, context } = useFloating({
-  //   open: isOpen,
-  //   onOpenChange: setIsOpen,
-  // });
-
-  // const click = useClick(context);
-
-  // const { getReferenceProps, getFloatingProps } = useInteractions([click]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div>
@@ -51,14 +56,13 @@ const Section = ({ section }: { section: ListSectionType }) => {
           />
         </button>
         <span>{section.heading}</span>
-        <button
-          type="button"
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="relative ml-auto text-2xl"
-          // ref={refs.setReference}
-          // {...getReferenceProps()}
-        >
-          <IoEllipsisHorizontalOutline />
+        <div className="relative ml-auto">
+          <button
+            type="button"
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="text-2xl">
+            <IoEllipsisHorizontalOutline />
+          </button>
           {isOpen && (
             <>
               <div
@@ -85,6 +89,10 @@ const Section = ({ section }: { section: ListSectionType }) => {
                 </button>
                 <button
                   type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    setIsModalOpen(true);
+                  }}
                   className="flex w-full items-center gap-2 rounded p-1 text-red-400 hover:bg-stone-700">
                   <FaTrashCan />
                   Delete
@@ -92,7 +100,7 @@ const Section = ({ section }: { section: ListSectionType }) => {
               </div>
             </>
           )}
-        </button>
+        </div>
       </div>
       {!isCollapsed && (
         <>
@@ -113,6 +121,32 @@ const Section = ({ section }: { section: ListSectionType }) => {
           </div>
           <AddTask />
         </>
+      )}
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center">
+          <div
+            className="fixed inset-0 bg-slate-800/60"
+            onClick={() => setIsModalOpen(false)}></div>
+          <div className="z-[2001] w-[400px] rounded-lg bg-slate-700 p-2">
+            Are you sure you want to delete both this section and all contained
+            tasks?
+            <div className="mt-4 flex justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="rounded border border-white px-4 py-2">
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteSection}
+                className="rounded bg-red-400 px-4 py-2">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
