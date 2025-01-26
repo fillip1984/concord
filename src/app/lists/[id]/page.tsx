@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
+import Loading from "~/app/_components/navigation/Loading";
 import ListView from "~/app/_components/tasks/ListView";
 import { api } from "~/trpc/react";
 import { type ListDetailType, type ListSectionType } from "~/trpc/types";
@@ -43,17 +44,16 @@ export default function ListPage({ params }: { params: { id: string } }) {
   }, [list]);
 
   return (
-    <div className="flex h-screen w-screen flex-1 justify-center overflow-hidden pt-8">
-      {isLoading && <span>Loading...</span>}
+    <div className="main-content-container">
+      {isLoading && <Loading />}
+
       {!isLoading && list && (
-        <div className="flex flex-1 flex-col items-center gap-6 overflow-y-auto pb-24">
-          <div className="w-[600px]">
-            <h4>{list?.name}</h4>
-            <div className="">
-              {listSections && <ListView listSections={listSections} />}
-            </div>
-            <AddSection list={list} />
-          </div>
+        <div className="main-content">
+          <h4>{list?.name}</h4>
+
+          {listSections && <ListView listSections={listSections} />}
+
+          <AddSection list={list} />
         </div>
       )}
     </div>

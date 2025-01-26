@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { api } from "~/trpc/react";
 import { type ListSectionType } from "~/trpc/types";
 import ListView from "../_components/tasks/ListView";
+import Loading from "../_components/navigation/Loading";
 
 export default function Upcoming() {
   const { data: tasks, isLoading } = api.task.upcoming.useQuery();
@@ -33,11 +34,11 @@ export default function Upcoming() {
   }, [tasks]);
 
   return (
-    <div className="flex">
-      {isLoading && <span>Loading...</span>}
+    <div className="main-content-container">
+      {isLoading && <Loading />}
 
       {!isLoading && (
-        <div>
+        <div className="main-content">
           <h4>Upcoming</h4>
           {listSections && <ListView listSections={listSections} />}
         </div>
