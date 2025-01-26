@@ -1,14 +1,10 @@
 "use client";
 
-import { format, isBefore, isEqual } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { api } from "~/trpc/react";
-import { type ListSectionType } from "~/trpc/types";
-import ListView from "../_components/tasks/ListView";
-import Loading from "../_components/navigation/Loading";
 
 export default function Upcoming() {
-  const { data: tasks, isLoading } = api.task.upcoming.useQuery();
+  const { data: tasks } = api.task.upcoming.useQuery();
   // const [listSections, setListSections] = useState<ListSectionType[]>();
   // const [overdueSection, setOverdueSection] = useState<ListSectionType>();
   // const [todaySection, setTodaySection] = useState<ListSectionType>();

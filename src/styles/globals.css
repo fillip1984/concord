@@ -47,10 +47,10 @@
   }
 
   .main-content-container {
-    @apply mx-auto w-full overflow-hidden sm:w-4/5 xl:w-1/2;
+    @apply flex flex-1 flex-col items-center overflow-y-auto px-4 pb-24 pt-8;
   }
 
   .main-content {
-    @apply flex h-full w-full flex-col gap-6 overflow-y-auto pb-24 pt-8;
+    @apply mx-auto w-full sm:w-4/5 xl:w-1/2;
   }
 }

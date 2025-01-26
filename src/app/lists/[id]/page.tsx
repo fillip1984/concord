@@ -8,7 +8,12 @@ import { api } from "~/trpc/react";
 import { type ListDetailType, type ListSectionType } from "~/trpc/types";
 
 export default function ListPage({ params }: { params: { id: string } }) {
-  const { data: list, isLoading } = api.list.readOne.useQuery(
+  const {
+    data: list,
+    isLoading,
+    isError,
+    refetch: retry,
+  } = api.list.readOne.useQuery(
     {
       id: params.id,
     },
@@ -45,7 +50,9 @@ export default function ListPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="main-content-container">
-      {isLoading && <Loading />}
+      {(isLoading || isError) && (
+        <Loading isLoading={isLoading} isError={isError} retry={retry} />
+      )}
 
       {!isLoading && list && (
         <div className="main-content">

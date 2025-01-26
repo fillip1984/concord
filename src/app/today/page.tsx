@@ -8,7 +8,12 @@ import ListView from "../_components/tasks/ListView";
 import Loading from "../_components/navigation/Loading";
 
 export default function Today() {
-  const { data: tasks, isLoading } = api.task.today.useQuery();
+  const {
+    data: tasks,
+    isLoading,
+    isError,
+    refetch: retry,
+  } = api.task.today.useQuery();
   const [listSections, setListSections] = useState<ListSectionType[]>();
   // const [overdueSection, setOverdueSection] = useState<ListSectionType>();
   // const [todaySection, setTodaySection] = useState<ListSectionType>();
@@ -47,7 +52,9 @@ export default function Today() {
 
   return (
     <div className="main-content-container">
-      {isLoading && <Loading />}
+      {(isLoading || isError) && (
+        <Loading isLoading={isLoading} isError={isError} retry={retry} />
+      )}
 
       {!isLoading && (
         <div className="main-content">

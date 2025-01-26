@@ -10,17 +10,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-// model Board {
-//     id        String   @id @default(cuid())
-//     createdAt DateTime @default(now())
-//     updatedAt DateTime @updatedAt
-
-//     name        String
-//     description String
-
-//     buckets Bucket[]
-// }
-
 model List {
     id        String   @id @default(cuid())
     createdAt DateTime @default(now())
@@ -49,21 +38,6 @@ model Section {
     listId String
 }
 
-// model Bucket {
-//     id        String   @id @default(cuid())
-//     createdAt DateTime @default(now())
-//     updatedAt DateTime @updatedAt
-
-//     name        String
-//     description String?
-//     position    Int
-
-//     tasks Task[]
-
-//     board   Board  @relation(fields: [boardId], references: [id])
-//     boardId String
-// }
-
 model Task {
     id        String   @id @default(cuid())
     createdAt DateTime @default(now())
@@ -76,10 +50,7 @@ model Task {
     dueDate     DateTime?
     priority    PriorityOption?
 
-    // bucket   Bucket @relation(fields: [bucketId], references: [id], onDelete: Cascade)
-    // bucketId String
-
-    section   Section @relation(fields: [sectionId], references: [id])
+    section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
     sectionId String
 
     tags TaskTags[]
