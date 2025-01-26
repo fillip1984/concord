@@ -45,7 +45,7 @@ export default function Today() {
   }, [tasks]);
 
   return (
-    <div className="flex w-screen flex-1 justify-center pt-8">
+    <div className="flex justify-center pt-8">
       {isLoading && <span>Loading...</span>}
       {!isLoading && (
         <div className="flex min-w-[600px] flex-col gap-6">

@@ -65,7 +65,7 @@ export default function SideNav() {
   return (
     <>
       <nav
-        className={`flex flex-col bg-orange-500 p-4 text-white transition-all duration-300 ${isSideNavOpen ? "w-full" : "w-[82px]"}`}>
+        className={`flex flex-col bg-orange-500 p-4 text-white transition-all duration-300 ${isSideNavOpen ? "w-[250px]" : "w-[82px]"}`}>
         <div className="flex justify-end">
           <button type="button" onClick={handleSideNavToggle}>
             <BsLayoutSidebarInset className="text-2xl" />
@@ -209,7 +209,7 @@ const ListDetailsModal = ({
   };
 
   return (
-    <div className="z-[1001] flex h-1/2 w-3/4 flex-col gap-2 rounded bg-stone-800 p-4">
+    <div className="flex flex-col gap-2 rounded bg-stone-800 p-4">
       <input
         type="text"
         value={name}

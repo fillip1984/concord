@@ -20,7 +20,7 @@ export default function RootLayout({
         <TRPCReactProvider>
           <div className="flex h-screen overflow-hidden bg-stone-900 text-white">
             <SideNav />
-            <main className="flex flex-1">
+            <main className="flex w-screen flex-1">
               {children}
               {/* <ReactQueryDevtoolsPanel /> */}
             </main>

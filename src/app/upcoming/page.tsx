@@ -33,7 +33,7 @@ export default function Upcoming() {
   }, [tasks]);
 
   return (
-    <div>
+    <div className="flex">
       {isLoading && <span>Loading...</span>}
 
       {!isLoading && (
