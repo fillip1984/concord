@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import ListView from "~/app/_components/tasks/ListView";
 import { api } from "~/trpc/react";
-import {
-  ListDetailType,
-  type ListSectionType,
-  type SectionType,
-} from "~/trpc/types";
+import { type ListDetailType, type ListSectionType } from "~/trpc/types";
 
 export default function ListPage({ params }: { params: { id: string } }) {
   const { data: list, isLoading } = api.list.readOne.useQuery(
@@ -17,16 +13,6 @@ export default function ListPage({ params }: { params: { id: string } }) {
     },
     { enabled: !!params.id },
   );
-
-  const utils = api.useUtils();
-
-  // edit task stuff
-  const [sectionToAddTaskTo, setSectionToAddTaskTo] =
-    useState<SectionType | null>();
-
-  const handleAddTask = (section: SectionType) => {
-    setSectionToAddTaskTo(section);
-  };
 
   const [listSections, setListSections] = useState<ListSectionType[]>();
   useEffect(() => {
