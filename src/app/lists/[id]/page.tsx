@@ -57,13 +57,17 @@ export default function ListPage({ params }: { params: { id: string } }) {
   }, [list]);
 
   return (
-    <div className="flex w-screen flex-1 justify-center pt-8">
+    <div className="flex h-screen w-screen flex-1 justify-center overflow-hidden pt-8">
       {isLoading && <span>Loading...</span>}
       {!isLoading && list && (
-        <div className="flex min-w-[600px] flex-col gap-6">
-          <h4>{list?.name}</h4>
-          <div>{listSections && <ListView listSections={listSections} />}</div>
-          <AddSection list={list} />
+        <div className="flex flex-1 flex-col items-center gap-6 overflow-y-auto pb-24">
+          <div className="w-[600px]">
+            <h4>{list?.name}</h4>
+            <div className="">
+              {listSections && <ListView listSections={listSections} />}
+            </div>
+            <AddSection list={list} />
+          </div>
         </div>
       )}
     </div>

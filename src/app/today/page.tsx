@@ -45,14 +45,13 @@ export default function Today() {
   }, [tasks]);
 
   return (
-    <div>
+    <div className="flex w-screen flex-1 justify-center pt-8">
       {isLoading && <span>Loading...</span>}
-
       {!isLoading && (
-        <div>
+        <div className="flex min-w-[600px] flex-col gap-6">
           <h4>Today</h4>
           <span>{taskCount} tasks</span>
-          {listSections && <ListView listSections={listSections} />}
+          <div>{listSections && <ListView listSections={listSections} />}</div>
         </div>
       )}
     </div>

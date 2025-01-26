@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { FaChevronDown, FaPlus } from "react-icons/fa6";
+import { FaChevronDown, FaPlus, FaTrashCan } from "react-icons/fa6";
 import { type ListSectionType } from "~/trpc/types";
 import TaskCard from "./TaskCard";
+import { useClick, useFloating, useInteractions } from "@floating-ui/react";
+import { MdDriveFileMoveOutline } from "react-icons/md";
+import { IoEllipsisHorizontalOutline } from "react-icons/io5";
+import { BiDuplicate } from "react-icons/bi";
+import { FiEdit3 } from "react-icons/fi";
 
 export default function ListView({
   listSections,
@@ -26,6 +31,17 @@ const Section = ({ section }: { section: ListSectionType }) => {
     setIsCollapsed((prev) => !prev);
   };
 
+  const [isOpen, setIsOpen] = useState(false);
+
+  // const { refs, floatingStyles, context } = useFloating({
+  //   open: isOpen,
+  //   onOpenChange: setIsOpen,
+  // });
+
+  // const click = useClick(context);
+
+  // const { getReferenceProps, getFloatingProps } = useInteractions([click]);
+
   return (
     <div>
       <div className="flex items-center gap-2">
@@ -35,6 +51,48 @@ const Section = ({ section }: { section: ListSectionType }) => {
           />
         </button>
         <span>{section.heading}</span>
+        <button
+          type="button"
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="relative ml-auto text-2xl"
+          // ref={refs.setReference}
+          // {...getReferenceProps()}
+        >
+          <IoEllipsisHorizontalOutline />
+          {isOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-[1000]"
+                onClick={() => setIsOpen(false)}></div>
+              <div className="absolute right-0 z-[1001] m-1 flex w-[250px] flex-col items-start rounded-lg border border-white bg-stone-800 p-2 text-sm">
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded p-1 hover:bg-stone-700">
+                  <FiEdit3 />
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded p-1 hover:bg-stone-700">
+                  <MdDriveFileMoveOutline />
+                  Move to...
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded p-1 hover:bg-stone-700">
+                  <BiDuplicate />
+                  Duplicate
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded p-1 text-red-400 hover:bg-stone-700">
+                  <FaTrashCan />
+                  Delete
+                </button>
+              </div>
+            </>
+          )}
+        </button>
       </div>
       {!isCollapsed && (
         <>

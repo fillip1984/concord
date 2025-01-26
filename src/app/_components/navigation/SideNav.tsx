@@ -58,7 +58,7 @@ export default function SideNav() {
     },
   ];
 
-  const [isSideNavOpen, setIsSideNavOpen] = useState(false);
+  const [isSideNavOpen, setIsSideNavOpen] = useState(true);
   const handleSideNavToggle = () => {
     setIsSideNavOpen((prev) => !prev);
   };
