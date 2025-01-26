@@ -73,81 +73,80 @@ export default function SideNav() {
         </div>
 
         {/* branding */}
-        <div>
-          <h4>Concord</h4>
 
-          {/* main nav items*/}
-          <div className="mt-12 flex flex-1 flex-col gap-2">
-            {mainNavItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex items-center gap-2 rounded bg-white/20 p-2 transition-colors hover:bg-white/10">
-                {item.icon}
-                <span
-                  className={`${isSideNavOpen ? "opacity-100" : "opacity-0"}`}>
-                  {item.label}
-                </span>
-              </Link>
-            ))}
-            <hr />
+        <h4>Concord</h4>
 
-            {/* lists */}
-            <h4>Lists</h4>
+        {/* main nav items*/}
+        <div className="mt-12 flex flex-1 flex-col gap-2">
+          {mainNavItems.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="flex items-center gap-2 rounded bg-white/20 p-2 transition-colors hover:bg-white/10">
+              {item.icon}
+              <span
+                className={`${isSideNavOpen ? "opacity-100" : "opacity-0"}`}>
+                {item.label}
+              </span>
+            </Link>
+          ))}
+          <hr />
 
-            <div className="flex">
-              <input
-                type="text"
-                value={listSearchAdd}
-                onChange={(e) => setListSearchAdd(e.target.value)}
-                placeholder="Search or add list..."
-                className="rounded-r-none text-sm"
-              />
-              <button
-                type="button"
-                onClick={handleAddList}
-                className="flex w-8 items-center justify-center rounded-r-lg border">
-                <FaPlus />
-              </button>
-            </div>
-            {lists
-              ?.filter((list) => list.parentListId === null)
-              .map((list) => (
-                <div key={list.id}>
+          {/* lists */}
+          <h4>Lists</h4>
+
+          <div className="flex">
+            <input
+              type="text"
+              value={listSearchAdd}
+              onChange={(e) => setListSearchAdd(e.target.value)}
+              placeholder="Search or add list..."
+              className="rounded-r-none text-sm"
+            />
+            <button
+              type="button"
+              onClick={handleAddList}
+              className="flex w-8 items-center justify-center rounded-r-lg border">
+              <FaPlus />
+            </button>
+          </div>
+          {lists
+            ?.filter((list) => list.parentListId === null)
+            .map((list) => (
+              <div key={list.id}>
+                <Link
+                  href={`/lists/${list.id}`}
+                  className="flex justify-between gap-2">
+                  <span>{list.name}</span>
+                  <button type="button" onClick={() => setListToEdit(list)}>
+                    <FaPencil />
+                  </button>
+                </Link>
+                {list.childLists?.map((childList) => (
                   <Link
-                    href={`/lists/${list.id}`}
-                    className="flex justify-between gap-2">
-                    <span>{list.name}</span>
-                    <button type="button" onClick={() => setListToEdit(list)}>
-                      <FaPencil />
-                    </button>
-                  </Link>
-                  {list.childLists?.map((childList) => (
-                    <Link
-                      href={`/lists/${childList.id}`}
-                      key={childList.id}
-                      className="ml-4 flex justify-between gap-2">
-                      <span>{childList.name}</span>
-                      {/* <button
+                    href={`/lists/${childList.id}`}
+                    key={childList.id}
+                    className="ml-4 flex justify-between gap-2">
+                    <span>{childList.name}</span>
+                    {/* <button
                       type="button"
                       onClick={() => setListToEdit(childList)}>
                       <FaPencil />
                     </button> */}
-                    </Link>
-                  ))}
-                </div>
-              ))}
-          </div>
+                  </Link>
+                ))}
+              </div>
+            ))}
+        </div>
 
-          {/* bottom nav items */}
-          <div className="flex flex-col items-center justify-center gap-2">
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded bg-white/20 p-2 transition-colors hover:bg-white/10">
-              <TbLogout className="text-3xl" />
-              <span className="sm:visible">Log out</span>
-            </button>
-          </div>
+        {/* bottom nav items */}
+        <div className="flex flex-col items-center justify-center gap-2">
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded bg-white/20 p-2 transition-colors hover:bg-white/10">
+            <TbLogout className="text-3xl" />
+            <span className="sm:visible">Log out</span>
+          </button>
         </div>
       </nav>
 
