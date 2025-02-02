@@ -151,15 +151,7 @@ export default function SideNav() {
       </nav>
 
       {listToEdit && (
-        <div className="absolute inset-0 z-[1000] flex h-screen w-screen items-center justify-center">
-          {/* backdrop */}
-          <div
-            onClick={() => setListToEdit(undefined)}
-            className="absolute inset-0 z-[1000] h-screen w-screen bg-black/80"></div>
-
-          {/* modal */}
-          <ListDetailsModal list={listToEdit} setListToEdit={setListToEdit} />
-        </div>
+        <ListDetailsModal list={listToEdit} setListToEdit={setListToEdit} />
       )}
     </>
   );
@@ -208,34 +200,42 @@ const ListDetailsModal = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded bg-stone-800 p-4">
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <select
-        value={parentListId}
-        onChange={(e) => setParentListId(e.target.value)}>
-        <option></option>
-        {lists
-          ?.filter((l) => l.id !== list.id)
-          .map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name}
-            </option>
-          ))}
-      </select>
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={handleSave}
-          className="rounded bg-orange-400 px-4 py-2 text-white">
-          Save
-        </button>
-        <button type="button" onClick={handleDelete}>
-          <FaTrash className="text-red-400" />
-        </button>
+    <div className="absolute inset-0 z-[1000] flex h-screen w-screen items-center justify-center">
+      {/* backdrop */}
+      <div
+        onClick={() => setListToEdit(undefined)}
+        className="absolute inset-0 z-[1000] h-screen w-screen bg-black/80"></div>
+
+      {/* modal content */}
+      <div className="z-[1001] flex flex-col gap-2 rounded bg-stone-800 p-4">
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <select
+          value={parentListId}
+          onChange={(e) => setParentListId(e.target.value)}>
+          <option></option>
+          {lists
+            ?.filter((l) => l.id !== list.id)
+            .map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
+        </select>
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={handleSave}
+            className="rounded bg-orange-400 px-4 py-2 text-white">
+            Save
+          </button>
+          <button type="button" onClick={handleDelete}>
+            <FaTrash className="text-red-400" />
+          </button>
+        </div>
       </div>
     </div>
   );

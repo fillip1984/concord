@@ -7,6 +7,7 @@ import { MdDriveFileMoveOutline } from "react-icons/md";
 import { api } from "~/trpc/react";
 import { type ListSectionType, type TaskType } from "~/trpc/types";
 import TaskCard from "./TaskCard";
+import TaskModal from "./TaskModal";
 
 export default function ListView({
   listSections,
@@ -143,6 +144,7 @@ const Section = ({ section }: { section: ListSectionType }) => {
 };
 
 const TaskRow = ({ task }: { task: TaskType }) => {
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const utils = api.useUtils();
   const { mutate: updateTask } = api.task.update.useMutation({
     onSuccess: async () => {
@@ -153,21 +155,36 @@ const TaskRow = ({ task }: { task: TaskType }) => {
     console.log("handling complete");
     updateTask({ ...task, complete: true });
   };
+
+  const handleTaskModal = () => {
+    console.log("showing task modal");
+    setIsTaskModalOpen(true);
+  };
+
   return (
     <div key={task.id}>
-      <hr />
-      <div className="flex gap-2 py-2">
-        <input
-          type="checkbox"
-          onClick={handleComplete}
-          className="rounded-full"
-        />
-        <div className="flex flex-col">
-          <span className="text-xs">{task.text}</span>
-          <span>{task.description}</span>
+      <div>
+        <hr />
+        <div className="flex gap-2 py-2">
+          <input
+            type="checkbox"
+            onClick={handleComplete}
+            className="rounded-full"
+          />
+          <button
+            onClick={handleTaskModal}
+            type="button"
+            className="flex flex-col">
+            <span className="text-xs">{task.text}</span>
+            <span>{task.description}</span>
+          </button>
         </div>
+        <hr />
+
+        {isTaskModalOpen && (
+          <TaskModal task={task} dismiss={() => setIsTaskModalOpen(false)} />
+        )}
       </div>
-      <hr />
     </div>
   );
 };
